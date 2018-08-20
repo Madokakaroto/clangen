@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Collections.Generic;
 using System.Text;
 
@@ -6,27 +7,37 @@ namespace clangen
 {
     class AST
     {
-        private Dictionary<string, Class> classes_;
-        private Dictionary<string, Class> unsettledClasses_;
+        private Dictionary<string, NativeClass> classes_;
+        private Dictionary<string, NativeClass> unsettledClasses_;
 
         public AST()
         {
-            classes_ = new Dictionary<string, Class>();
-            unsettledClasses_ = new Dictionary<string, Class>();
+            classes_ = new Dictionary<string, NativeClass>();
+            unsettledClasses_ = new Dictionary<string, NativeClass>();
         }
 
-        public Class GetClass(string className, out bool unsettled)
+        public NativeClass GetClass(string className, StructOrClass classTag, out bool unsettled)
         {
             if(classes_.ContainsKey(className))
             {
                 unsettled = false;
-                return classes_[className];
+                NativeClass findClass = classes_[className];
+                if(findClass.ClassTag == StructOrClass.InDoubt)
+                {
+                    findClass.ClassTag = classTag;
+                }
+
+                if(findClass.ClassTag != StructOrClass.InDoubt && classTag != StructOrClass.InDoubt)
+                {
+                    Debug.Assert(findClass.ClassTag == classTag);
+                }
+                return findClass;
             }
             else
             {
                 if(!unsettledClasses_.ContainsKey(className))
                 {
-                    unsettledClasses_.Add(className, new Class(className));
+                    unsettledClasses_.Add(className, new NativeClass(className, classTag));
                 }
 
                 unsettled = true;
@@ -34,7 +45,7 @@ namespace clangen
             }
         }
 
-        public void AddClass(Class @class)
+        public void AddClass(NativeClass @class)
         {
             classes_.Add(@class.Name, @class);
             if(unsettledClasses_.ContainsKey(@class.Name))

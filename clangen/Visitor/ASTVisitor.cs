@@ -40,20 +40,20 @@ namespace clangen
             IASTVisitor visitor = null;
             switch (cursor.kind)
             {
-            // dealing with class
-            case CXCursorKind.CXCursor_StructDecl:
-            case CXCursorKind.CXCursor_ClassDecl:
-                visitor = new ClassVisitor(ast);
-                break;
-            // dealing with enum type            
-            case CXCursorKind.CXCursor_EnumDecl:
-                break;
-            // dealing with function
-            case CXCursorKind.CXCursor_FunctionDecl:
-                break;
-            // TODO ... any other
-            default:
-                break;
+                // dealing with class
+                case CXCursorKind.CXCursor_StructDecl:
+                case CXCursorKind.CXCursor_ClassDecl:
+                    visitor = new ClassVisitor(ast);
+                    break;
+                // dealing with enum type            
+                case CXCursorKind.CXCursor_EnumDecl:
+                    break;
+                // dealing with function
+                case CXCursorKind.CXCursor_FunctionDecl:
+                    break;
+                // TODO ... any other
+                default:
+                    break;
             }
 
             if(visitor != null)

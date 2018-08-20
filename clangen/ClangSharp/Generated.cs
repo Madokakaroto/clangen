@@ -1339,7 +1339,7 @@
 
     public static partial class clang
     {
-        private const string libraryPath = @"D:\coding\llvm_toolchain\llvm_install\bin\libclang.dll";
+        private const string libraryPath = @"D:\programming\llvm_toolchain\llvm_install\bin\libclang.dll";
 
         [DllImport(libraryPath, EntryPoint = "clang_getCString", CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr getCString(CXString @string);
