@@ -17,16 +17,17 @@ namespace clangen
         // auto property
         public string Name { get; }
         public StructOrClass ClassTag { get; set; }
+        public bool IsTemplateInstance { get; set; }
 
         // private data
         private List<NativeClass> baseClasses_;
-        private Dictionary<string, List<MemberFunction>> memberFunctions_; 
+        private Dictionary<string, List<MemberFunction>> memberFunctions_;
 
-        public NativeClass(string name, StructOrClass classTag = StructOrClass.InDoubt)
+        public NativeClass(string name)
         {
             Name = name;
-            ClassTag = classTag;
-
+            ClassTag = StructOrClass.InDoubt;
+            IsTemplateInstance = false;
             baseClasses_ = new List<NativeClass>();
             memberFunctions_ = new Dictionary<string, List<MemberFunction>>();
         }
@@ -40,8 +41,12 @@ namespace clangen
         {
             if(memberFunctions_.ContainsKey(func.Name))
             {
-                memberFunctions_[func.Name].ElementAt(0).
+                if(memberFunctions_[func.Name].Count() == 1)
+                    memberFunctions_[func.Name].ElementAt(0).IsOverload = true;
+
+                func.IsOverload = true;
             }
+            memberFunctions_[func.Name].Add(func);
         }
     }
 }

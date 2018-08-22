@@ -49,9 +49,11 @@ namespace clangen
             CXTranslationUnit TU;
             string[] @params = args.Slice(1);
 
+            uint option = clang.defaultEditingTranslationUnitOptions();
+
             CXUnsavedFile unsavedFile = new CXUnsavedFile();
             var error = clang.parseTranslationUnit2(Index, args[0], @params, @params.Length, out unsavedFile, 0,
-                clang.defaultCodeCompleteOptions(), out TU);
+                option, out TU);
             if(error != CXErrorCode.CXError_Success)
              {
                 Console.WriteLine("Error: " + error);
@@ -67,6 +69,8 @@ namespace clangen
 
             ASTVisitor visitor = new ASTVisitor();
             visitor.Visit(TU);
+
+            return;
         }
 
         private static long GetFileSize(string FileName)
