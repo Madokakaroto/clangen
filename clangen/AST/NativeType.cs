@@ -5,8 +5,9 @@ using System.Diagnostics;
 
 namespace clangen
 {
-    enum BasicType
+    public enum BasicType
     {
+        Unknown,
         Int8,
         Int16,
         Int32,
@@ -20,95 +21,61 @@ namespace clangen
         Float,
         Double,
         LDouble,
+        Enum,
         Object
     }
 
-    enum QualifierType
+    public enum QulifierType
     {
-        Const,
-        Ptr,
         LRef,
-        RRef
+        RRef,
+        Ptr,
+        ConstPtr,
     }
 
-    class TypeQualifiers
+    public class TypeQualifiers
     {
-        private QualifierType[] qualifiers_;
-        private uint qualifierCount;
+        private Stack<QulifierType> qulifiers;
 
         public TypeQualifiers()
         {
-            qualifiers_ = new QualifierType[4];
-            qualifierCount = 0;
+            qulifiers = new Stack<QulifierType>();
         }
 
-        public void AddQualifier(QualifierType @type)
+        public void PushLValueReference()
         {
-            qualifiers_[qualifierCount] = @type;
-            qualifierCount++;
+            qulifiers.Push(QulifierType.LRef);
         }
 
-        public QualifierType GetQualifier(uint index)
+        public void PushRValueReference()
         {
-            return qualifiers_[index];
+            qulifiers.Push(QulifierType.RRef);
+        }
+
+        public void PushPointer()
+        {
+            qulifiers.Push(QulifierType.Ptr);
+        }
+
+        public void PushConstPointer()
+        {
+            qulifiers.Push(QulifierType.ConstPtr);
         }
     }
 
 
-    class NativeType
+    public class NativeType
     {
         // property
-        public BasicType Type { get; }
-        public NativeClass Class { get; }
+        public BasicType Type { get; set; } = BasicType.Unknown;
+        public NativeClass Class { get; set; } = null;
         public TypeQualifiers Qualifiers { get; } = new TypeQualifiers();
+        public string TypeName { get; }
+        public bool IsConst { get; set; } = false;
 
-        NativeType(BasicType t)
+        public NativeType(string typeName)
         {
-            Type = t;
-            Class = null;
-        }
-
-        NativeType(NativeClass c)
-        {
-            Type = BasicType.Object;
-            Class = c;
-        }
-
-        static NativeType CreateNativeType(BasicType type)
-        {
-            Debug.Assert(type != BasicType.Object);
-            return new NativeType(type);
-        }
-
-        static NativeType CreateNativeType(NativeClass c)
-        {
-            return new NativeType(c);
-        }
-
-        public NativeType AddConst()
-        {
-            return AddQualifier(QualifierType.Const);
-        }
-
-        public NativeType AddPointer()
-        {
-            return AddQualifier(QualifierType.Ptr);
-        }
-
-        public NativeType AddLRef()
-        {
-            return AddQualifier(QualifierType.LRef);
-        }
-
-        public NativeType AddRRef()
-        {
-            return AddQualifier(QualifierType.RRef);
-        }
-
-        NativeType AddQualifier(QualifierType qualifierType)
-        {
-            Qualifiers.AddQualifier(qualifierType);
-            return this;
+            TypeName = typeName;
         }
     }
 

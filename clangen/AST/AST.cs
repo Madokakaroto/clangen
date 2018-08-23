@@ -9,11 +9,13 @@ namespace clangen
     {
         private Dictionary<string, NativeClass> classes_;
         private Dictionary<string, NativeClass> unsettledClasses_;
+        private Dictionary<string, NativeType> types_;
 
         public AST()
         {
             classes_ = new Dictionary<string, NativeClass>();
             unsettledClasses_ = new Dictionary<string, NativeClass>();
+            types_ = new Dictionary<string, NativeType>();
         }
 
         public NativeClass GetClass(string className, out bool unsettled)
@@ -47,6 +49,22 @@ namespace clangen
             if(unsettledClasses_.ContainsKey(@class.Name))
             {
                 unsettledClasses_.Remove(@class.Name);
+            }
+        }
+
+        public NativeType GetType(string typeName, out bool unsettled)
+        {
+            if(types_.ContainsKey(typeName))
+            {
+                unsettled = false;
+                return types_[typeName];
+            }
+            else
+            {
+                NativeType type = new NativeType(typeName);
+                types_.Add(typeName, type);
+                unsettled = true;
+                return type;
             }
         }
     }

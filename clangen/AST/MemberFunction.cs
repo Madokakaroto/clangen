@@ -2,7 +2,7 @@
 using System.Diagnostics;
 namespace clangen
 {
-    class MemberFunction
+    public class MemberFunction
     {
         private NativeClass class_;
         public string Name { get; }

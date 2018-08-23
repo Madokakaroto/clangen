@@ -16,8 +16,11 @@ namespace clangen
 
         public bool DoVisit(CXCursor cursor, CXCursor parent)
         {
-            // get class token name
-            string className = clang.getCursorDisplayName(cursor).ToString();
+            // get class type
+            CXType type = clang.getCursorType(cursor);
+
+            // get class name
+            string className = clang.getTypeSpelling(type).ToString();
 
             // get class object
             bool unsetteld = false;
@@ -25,7 +28,7 @@ namespace clangen
             if (unsetteld)
             {
                 //proces class detail
-                ProcessClassDetail(@class, cursor);
+                ProcessClassDetail(@class, cursor, type);
 
                 // process parent
                 //ProcessParent(@class, parent);
@@ -69,8 +72,8 @@ namespace clangen
 
         private void ProcessBaseClass(NativeClass thisClass, CXCursor cursor, CXCursor parent)
         {
-            CXCursor refCursor = clang.getCursorReferenced(cursor);
-            string name = clang.getCursorSpelling(refCursor).ToString();
+            CXType type = clang.getCursorType(cursor);
+            string name = clang.getTypeSpelling(type).ToString();
             NativeClass @class = AST_.GetClass(name);
             thisClass.AddBaseClass(@class);
         }
@@ -91,22 +94,14 @@ namespace clangen
             // TODO deep iterate
         }
 
-        private bool NestedClassCursor(CXCursor parent)
+        private void ProcessClassDetail(
+            NativeClass thisClass,              // this class to parse
+            CXCursor cursor,                    // current cursor
+            CXType type                         // current cursor type
+            )
         {
-            //return (parent.kind == CXCursorKind.CXCursor_ClassDecl) ||
-            //    (parent.kind == CXCursorKind.CXCursor_StructDecl) ||
-            //    /*(parent.kind == CXCursorKind.CXCursor_ClassTemplate) ||*/
-            //    (parent.kind == CXCursorKind.CXCursor_ClassTemplatePartialSpecialization);
-            if (parent.kind == CXCursorKind.CXCursor_ClassDecl || parent.kind == CXCursorKind.CXCursor_StructDecl)
-                return true;
-
-            return false;
-        }
-
-        private void ProcessClassDetail(NativeClass thisClass, CXCursor cursor)
-        {
-            // get cursor kind
-            CXCursorKind cursorKind = clang.getCursorKind(cursor);
+            // check cursor kind
+            CXCursorKind cursorKind = cursor.kind;
             Debug.Assert(
                 cursorKind == CXCursorKind.CXCursor_ClassDecl ||
                 cursorKind == CXCursorKind.CXCursor_StructDecl);
@@ -116,9 +111,7 @@ namespace clangen
                 StructOrClass.Class : StructOrClass.Struct;
 
             // set template instance info
-            CXType theType = clang.getCursorType(cursor);
-            int templateNum = clang.Type_getNumTemplateArguments(theType);
-            
+            int templateNum = clang.Type_getNumTemplateArguments(type);
             if(templateNum < 0)
             {
                 thisClass.IsTemplateInstance = false;
@@ -128,32 +121,14 @@ namespace clangen
                 thisClass.IsTemplateInstance = true;
                 for(int loop = 0; loop < templateNum; ++loop)
                 {
-                    CXType type = clang.Type_getTemplateArgumentAsType(theType, (uint)loop);
+                    CXType argType = clang.Type_getTemplateArgumentAsType(type, (uint)loop);
 
                     // TODO ... add to this class
+                    TypeVisitor.CreateNativeType(AST_, argType);
                 }
             }
         }
 
-        private void ProcessParent(NativeClass thisClass, CXCursor parent)
-        {
-            //if(parent.kind )
-            CXCursor temp = parent;
-            if(NestedClassCursor(parent))
-            {
-                //string ownerClassName = 
-            }
-            else
-            {
-                while (temp.kind != CXCursorKind.CXCursor_TranslationUnit)
-                {
-                    if (temp.kind == CXCursorKind.CXCursor_Namespace)
-                    {
 
-                    }
-
-                }
-            }
-        }
     }
 }

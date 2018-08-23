@@ -51,8 +51,13 @@ namespace clangen
                 // dealing with function
                 case CXCursorKind.CXCursor_FunctionDecl:
                     break;
-                // TODO ... any other
+                case CXCursorKind.CXCursor_Namespace:
+                    // ignore anonymous namespace
+                    if (clang.Cursor_isAnonymous(cursor) != 0)
+                        return CXChildVisitResult.CXChildVisit_Continue;
+                    return CXChildVisitResult.CXChildVisit_Recurse;
                 default:
+                    // TODO ... any other
                     break;
             }
 

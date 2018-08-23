@@ -5,14 +5,14 @@ using System.Text;
 
 namespace clangen
 {
-    enum StructOrClass
+    public enum StructOrClass
     {
         Struct = -1,
         InDoubt = 0,
         Class = 1,
     }
 
-    class NativeClass
+    public class NativeClass
     {
         // auto property
         public string Name { get; }
