@@ -50,6 +50,18 @@ namespace clangen
             return false;
         }
 
+        public static bool IsSigned(CXType type)
+        {
+            return type.kind >= CXTypeKind.CXType_Char_S &&
+                type.kind <= CXTypeKind.CXType_Int128;
+        }
+
+        public static bool IsUnsigned(CXType type)
+        {
+             return type.kind >= CXTypeKind.CXType_Char_U &&
+                type.kind <= CXTypeKind.CXType_UInt128;
+        }
+
         public static bool IsFloatingPoint(CXType type)
         {
             if (type.kind >= CXTypeKind.CXType_Float &&
@@ -94,6 +106,43 @@ namespace clangen
             // TODO ... complete
             switch (type.kind)
             {
+                case CXTypeKind.CXType_Void:
+                    return BasicType.Void;
+                case CXTypeKind.CXType_Bool:
+                    return BasicType.Bool;
+                case CXTypeKind.CXType_Char_U:
+                case CXTypeKind.CXType_UChar:
+                    return BasicType.UChar;
+                case CXTypeKind.CXType_Char16:
+                    return BasicType.Int16;
+                case CXTypeKind.CXType_Char32:
+                    return BasicType.Int32;
+                case CXTypeKind.CXType_UShort:
+                    return BasicType.UInt16;
+                case CXTypeKind.CXType_UInt:
+                    return BasicType.UInt32;
+                case CXTypeKind.CXType_ULong:
+                    return BasicType.UInt64;
+                case CXTypeKind.CXType_Char_S:
+                case CXTypeKind.CXType_SChar:
+                    return BasicType.Char;
+                case CXTypeKind.CXType_WChar:
+                case CXTypeKind.CXType_Short:
+                    return BasicType.Int16;
+                case CXTypeKind.CXType_Int:
+                    return BasicType.Int32;
+                case CXTypeKind.CXType_Long:
+                    return BasicType.Int64;
+                case CXTypeKind.CXType_Float:
+                    return BasicType.Float;
+                case CXTypeKind.CXType_Double:
+                    return BasicType.Double;
+                case CXTypeKind.CXType_LongDouble:
+                    return BasicType.LongDouble;
+                case CXTypeKind.CXType_Record:
+                    return BasicType.Object;
+                case CXTypeKind.CXType_Enum:
+                    return BasicType.Enum;
                 default:
                     return BasicType.Unknown;
             }

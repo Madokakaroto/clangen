@@ -7,16 +7,11 @@ namespace clangen
 {
     public class AST
     {
-        private Dictionary<string, NativeClass> classes_;
-        private Dictionary<string, NativeClass> unsettledClasses_;
-        private Dictionary<string, NativeType> types_;
-
-        public AST()
-        {
-            classes_ = new Dictionary<string, NativeClass>();
-            unsettledClasses_ = new Dictionary<string, NativeClass>();
-            types_ = new Dictionary<string, NativeType>();
-        }
+        private Dictionary<string, NativeClass> classes_ = new Dictionary<string, NativeClass>();
+        private Dictionary<string, NativeClass> unsettledClasses_ = new Dictionary<string, NativeClass>();
+        private Dictionary<string, NativeType> types_ = new Dictionary<string, NativeType>();
+        private Dictionary<string, Enumeration> enums_ = new Dictionary<string, Enumeration>();
+        private Dictionary<string, Enumeration> unsettledEnums_ = new Dictionary<string, Enumeration>();
 
         public NativeClass GetClass(string className, out bool unsettled)
         {
@@ -65,6 +60,40 @@ namespace clangen
                 types_.Add(typeName, type);
                 unsettled = true;
                 return type;
+            }
+        }
+
+        public Enumeration GetEnum(string enumName, out bool unsettled)
+        {
+            if(enums_.ContainsKey(enumName))
+            {
+                unsettled = false;
+                return enums_[enumName];
+            }
+            else
+            {
+                if(!unsettledEnums_.ContainsKey(enumName))
+                {
+                    unsettledEnums_.Add(enumName, new Enumeration(enumName));
+                }
+
+                unsettled = true;
+                return unsettledEnums_[enumName];
+            }
+        }
+
+        public Enumeration GetEnum(string enumName)
+        {
+            bool dummy = false;
+            return GetEnum(enumName, out dummy);
+        }
+
+        public void AddEnum(Enumeration @enum)
+        {
+            enums_.Add(@enum.Name, @enum);
+            if(unsettledEnums_.ContainsKey(@enum.Name))
+            {
+                unsettledEnums_.Remove(@enum.Name);
             }
         }
     }

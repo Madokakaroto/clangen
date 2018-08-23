@@ -47,6 +47,7 @@ namespace clangen
                     break;
                 // dealing with enum type            
                 case CXCursorKind.CXCursor_EnumDecl:
+                    visitor = new EnumVisitor(ast);
                     break;
                 // dealing with function
                 case CXCursorKind.CXCursor_FunctionDecl:
