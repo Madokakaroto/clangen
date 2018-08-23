@@ -2,7 +2,7 @@
 using System.Diagnostics;
 namespace clangen
 {
-    public class MemberFunction
+    public class Method
     {
         private NativeClass class_;
         public string Name { get; }
@@ -14,7 +14,7 @@ namespace clangen
         public bool IsOverload { get; set; }
         public bool IsOverride { get; set; }
 
-        public MemberFunction(
+        public Method(
             NativeClass @class,
             string name, 
             bool isStatic,

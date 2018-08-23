@@ -52,11 +52,14 @@ namespace clangen
             CXCursorKind kind = clang.getCursorKind(cursor);
             switch(kind)
             {
-                case CXCursorKind.CXCursor_CXXMethod:
-                    ProcessMethod(thisClass, cursor, parent);
-                    break;
                 case CXCursorKind.CXCursor_FieldDecl:
                     ProcessField(thisClass, cursor, parent);
+                    break;
+                case CXCursorKind.CXCursor_VarDecl:
+                    ProcessField(thisClass, cursor, parent, true);
+                    break;
+                case CXCursorKind.CXCursor_CXXMethod:
+                    ProcessMethod(thisClass, cursor, parent);
                     break;
                 case CXCursorKind.CXCursor_CXXBaseSpecifier:
                     ProcessBaseClass(thisClass, cursor, parent);
@@ -99,7 +102,7 @@ namespace clangen
             bool isVirtual = clang.CXXMethod_isVirtual(cursor) != 0;
             bool isAbastrct = clang.CXXMethod_isPureVirtual(cursor) != 0;
 
-            MemberFunction memberFunc = new MemberFunction( thisClass,
+            Method memberFunc = new Method( thisClass,
                 name, isStataic, isConst, isVirtual, isAbastrct);
 
             thisClass.AddMethod(memberFunc);
@@ -143,12 +146,25 @@ namespace clangen
             }
         }
 
-        private void ProcessField(NativeClass thisClass, CXCursor cursor, CXCursor parent)
+        private void ProcessField(NativeClass thisClass, CXCursor cursor, CXCursor parent, bool isStatic = false)
         {
-            CXType type = clang.getCursorType(cursor);
+            // get field name
             string fieldName = clang.getCursorSpelling(cursor).ToString();
+
+            // get field type
+            CXType type = clang.getCursorType(cursor);
             NativeType nativeType = TypeVisitHelper.GetNativeType(AST_, type);
-            thisClass.AddField(fieldName, nativeType);
+
+            // get field access specifier
+            AccessSpecifier access = ClangTraits.ToAccessSpecifier(clang.getCXXAccessSpecifier(cursor));
+
+            // create field object
+            Field f = new Field();
+            f.Access = access;
+            f.Type = nativeType;
+            f.IsStatic = isStatic;
+
+            thisClass.AddField(fieldName, f);
         }
     }
 }

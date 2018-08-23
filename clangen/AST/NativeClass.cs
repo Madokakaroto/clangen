@@ -41,10 +41,10 @@ namespace clangen
 
         // private data
         private List<BaseClass> baseClasses_ = new List<BaseClass>();
-        private Dictionary<string, List<MemberFunction>> memberFunctions_
-            = new Dictionary<string, List<MemberFunction>>();
-        private Dictionary<string, NativeType> memberData_
-            = new Dictionary<string, NativeType>();
+        private Dictionary<string, List<Method>> methods_
+            = new Dictionary<string, List<Method>>();
+        private Dictionary<string, Field> fields_
+            = new Dictionary<string, Field>();
 
         public NativeClass(string name)
         {
@@ -56,29 +56,29 @@ namespace clangen
             baseClasses_.Add(baseClass);
         }
 
-        public void AddMethod(MemberFunction func)
+        public void AddMethod(Method func)
         {
             string funcName = func.Name;
-            if (memberFunctions_.ContainsKey(funcName))
+            if (methods_.ContainsKey(funcName))
             {
-                if (memberFunctions_[func.Name].Count() == 1)
-                    memberFunctions_[func.Name].ElementAt(0).IsOverload = true;
+                if (methods_[func.Name].Count() == 1)
+                    methods_[func.Name].ElementAt(0).IsOverload = true;
 
                 func.IsOverload = true;
             }
             else
             {
-                memberFunctions_.Add(funcName, new List<MemberFunction>());
+                methods_.Add(funcName, new List<Method>());
             }
-            memberFunctions_[funcName].Add(func);
+            methods_[funcName].Add(func);
         }
 
-        public void AddField(string name, NativeType type)
+        public void AddField(string name, Field field)
         {
-            Debug.Assert(!memberData_.ContainsKey(name));
-            if(!memberData_.ContainsKey(name))
+            Debug.Assert(!fields_.ContainsKey(name));
+            if(!fields_.ContainsKey(name))
             {
-                memberData_.Add(name, type);
+                fields_.Add(name, field);
             }
         }
 
