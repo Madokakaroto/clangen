@@ -98,5 +98,10 @@ namespace clangen
                     return BasicType.Unknown;
             }
         }
+
+        public static AccessSpecifier ToAccessSpecifier(CX_CXXAccessSpecifier accessSpecifier)
+        {
+            return (AccessSpecifier)(accessSpecifier);
+        }
     }
 }

@@ -5,18 +5,9 @@ using ClangSharp;
 
 namespace clangen
 {
-    class TypeVisitor
+    public class TypeVisitHelper
     {
-        static public NativeType CreateNativeType(AST ast, CXCursor cursor)
-        {
-            CXCursorKind cursorKind = cursor.kind;
-            CXType cursorType = clang.getCursorType(cursor);
-
-            //return NativeType.CreateNativeType();
-            return null;
-        }
-
-        static public NativeType CreateNativeType(AST ast, CXType type)
+        static public NativeType GetNativeType(AST ast, CXType type)
         {
             string typeName = clang.getTypeSpelling(type).ToString();
             bool unsetteld = false;

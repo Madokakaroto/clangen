@@ -5,7 +5,7 @@ using System.Text;
 
 namespace clangen
 {
-    class AST
+    public class AST
     {
         private Dictionary<string, NativeClass> classes_;
         private Dictionary<string, NativeClass> unsettledClasses_;

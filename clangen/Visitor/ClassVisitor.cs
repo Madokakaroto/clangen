@@ -30,9 +30,6 @@ namespace clangen
                 //proces class detail
                 ProcessClassDetail(@class, cursor, type);
 
-                // process parent
-                //ProcessParent(@class, parent);
-
                 // create IntPtr for context
                 GCHandle astHandle = GCHandle.Alloc(@class);
 
@@ -63,6 +60,9 @@ namespace clangen
                 case CXCursorKind.CXCursor_CXXBaseSpecifier:
                     ProcessBaseClass(thisClass, cursor, parent);
                     break;
+                case CXCursorKind.CXCursor_CXXFinalAttr:
+                    thisClass.IsFinal = true;
+                    break;
                 default:
                     break;
             }
@@ -72,10 +72,22 @@ namespace clangen
 
         private void ProcessBaseClass(NativeClass thisClass, CXCursor cursor, CXCursor parent)
         {
+            BaseClass baseClass = new BaseClass();
+
+            // get class
             CXType type = clang.getCursorType(cursor);
+            CXCursor typeDeclCursor = clang.getTypeDeclaration(type);
             string name = clang.getTypeSpelling(type).ToString();
-            NativeClass @class = AST_.GetClass(name);
-            thisClass.AddBaseClass(@class);
+            baseClass.Class = AST_.GetClass(name);
+            
+            // check is virtual base
+            baseClass.IsVirtual = clang.CXXRecord_isAbstract(typeDeclCursor) != 0;
+
+            // check access specifier
+            baseClass.Access = ClangTraits.ToAccessSpecifier(clang.getCXXAccessSpecifier(cursor));
+
+            // register base class
+            thisClass.AddBaseClass(baseClass);
         }
 
         private void ProcessMethod(NativeClass thisClass, CXCursor cursor, CXCursor parent)
@@ -110,25 +122,24 @@ namespace clangen
             thisClass.ClassTag = cursorKind == CXCursorKind.CXCursor_ClassDecl ?
                 StructOrClass.Class : StructOrClass.Struct;
 
+            // abstract
+            thisClass.IsAbstract = clang.CXXRecord_isAbstract(cursor) != 0;
+
+            // virtual base
+            thisClass.IsVirtualBae = clang.isVirtualBase(cursor) != 0;
+
             // set template instance info
             int templateNum = clang.Type_getNumTemplateArguments(type);
-            if(templateNum < 0)
+            if(templateNum > 0)
             {
-                thisClass.IsTemplateInstance = false;
-            }
-            else
-            {
-                thisClass.IsTemplateInstance = true;
-                for(int loop = 0; loop < templateNum; ++loop)
+                thisClass.SetTemplateParameterCount((uint)templateNum);
+                for (int loop = 0; loop < templateNum; ++loop)
                 {
                     CXType argType = clang.Type_getTemplateArgumentAsType(type, (uint)loop);
-
-                    // TODO ... add to this class
-                    TypeVisitor.CreateNativeType(AST_, argType);
+                    NativeType nativeType = TypeVisitHelper.GetNativeType(AST_, argType);
+                    thisClass.SetTemplateParameter((uint)loop, nativeType);
                 }
             }
         }
-
-
     }
 }
