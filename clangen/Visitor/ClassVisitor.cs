@@ -56,6 +56,7 @@ namespace clangen
                     ProcessMethod(thisClass, cursor, parent);
                     break;
                 case CXCursorKind.CXCursor_FieldDecl:
+                    ProcessField(thisClass, cursor, parent);
                     break;
                 case CXCursorKind.CXCursor_CXXBaseSpecifier:
                     ProcessBaseClass(thisClass, cursor, parent);
@@ -140,6 +141,14 @@ namespace clangen
                     thisClass.SetTemplateParameter((uint)loop, nativeType);
                 }
             }
+        }
+
+        private void ProcessField(NativeClass thisClass, CXCursor cursor, CXCursor parent)
+        {
+            CXType type = clang.getCursorType(cursor);
+            string fieldName = clang.getCursorSpelling(cursor).ToString();
+            NativeType nativeType = TypeVisitHelper.GetNativeType(AST_, type);
+            thisClass.AddField(fieldName, nativeType);
         }
     }
 }

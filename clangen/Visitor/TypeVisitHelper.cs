@@ -32,6 +32,14 @@ namespace clangen
                             nativeType.Class = ast.GetClass(removeQualifierName);
                         }
                     }
+                    else if(ClangTraits.IsTypedef(tmp))
+                    {
+                        CXCursor typedefedCursor = clang.getTypeDeclaration(tmp);
+                        CXType typedefedType = clang.getTypedefDeclUnderlyingType(typedefedCursor);
+                        NativeType typedefedNativeType = GetNativeType(ast, typedefedType);
+                        nativeType.IsConst = isConst;
+                        nativeType.SetTypedefedType(typedefedNativeType);
+                    }
                     else
                     {
                         if (ClangTraits.IsLValueReference(tmp))
@@ -49,12 +57,11 @@ namespace clangen
                             else
                                 nativeType.Qualifiers.PushPointer();
                         }
-
-                        tmp = clang.getPointeeType(tmp);
                     }
+
+                    tmp = clang.getPointeeType(tmp);
                 }
             }
-
             return nativeType;
         }
 

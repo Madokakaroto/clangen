@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Diagnostics;
 
 namespace clangen
 {
@@ -37,10 +38,13 @@ namespace clangen
         public bool IsVirtualBae { get; set; } = false;
         public bool IsTemplateInstance { get; private set; } = false;
         public NativeType[] TemplateParameters { get; private set; } = null;
+
         // private data
         private List<BaseClass> baseClasses_ = new List<BaseClass>();
         private Dictionary<string, List<MemberFunction>> memberFunctions_
             = new Dictionary<string, List<MemberFunction>>();
+        private Dictionary<string, NativeType> memberData_
+            = new Dictionary<string, NativeType>();
 
         public NativeClass(string name)
         {
@@ -67,6 +71,15 @@ namespace clangen
                 memberFunctions_.Add(funcName, new List<MemberFunction>());
             }
             memberFunctions_[funcName].Add(func);
+        }
+
+        public void AddField(string name, NativeType type)
+        {
+            Debug.Assert(!memberData_.ContainsKey(name));
+            if(!memberData_.ContainsKey(name))
+            {
+                memberData_.Add(name, type);
+            }
         }
 
         public void SetTemplateParameterCount(uint count)
