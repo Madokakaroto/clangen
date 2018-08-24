@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Diagnostics;
+using System.Collections.Generic;
 
 namespace clangen
 {
@@ -70,12 +69,42 @@ namespace clangen
         }
     }
 
+    public class TypeInfo
+    {
+        public BasicType Type { get; private set; }
+        private object Info;
+
+        public TypeInfo()
+        {
+            Type = BasicType.Unknown;
+        }
+
+        public void SetBasicType(BasicType type)
+        {
+            Debug.Assert(ASTTraits.IsBuiltInType(type));
+            Type = type;
+            Info = null;
+        }
+
+        public void SetClass(NativeClass @class)
+        {
+            Type = BasicType.Object;
+            Info = @class;
+        }
+
+        public void SetEnum(Enumeration @enum)
+        {
+            Type = BasicType.Enum;
+            Info = @enum;
+        }
+
+
+    }
 
     public class NativeType
     {
         // property
-        public BasicType Type { get; set; } = BasicType.Unknown;
-        public NativeClass Class { get; set; } = null;
+        public TypeInfo Info { get; private set; }
         public TypeQualifiers Qualifiers { get; } = new TypeQualifiers();
         public string TypeName { get; }
         public bool IsConst { get; set; } = false;
@@ -86,6 +115,7 @@ namespace clangen
         public NativeType(string typeName)
         {
             TypeName = typeName;
+            Info = new TypeInfo();
         }
 
         public void SetTypedefedType(NativeType type)
@@ -140,6 +170,4 @@ namespace clangen
             return TypeName;
         }
     }
-
-
 }

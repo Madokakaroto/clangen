@@ -8,11 +8,11 @@ namespace clangen
 {
     class FunctionVisitor : IASTVisitor
     {
-        private ASTVisitor ASTVisitor_;
+        private AST AST_;
 
-        public FunctionVisitor(ASTVisitor visitor)
+        public FunctionVisitor(AST ast)
         {
-            ASTVisitor_ = visitor;
+            AST_ = ast;
         }
 
         public bool DoVisit(CXCursor cursor, CXCursor parent)

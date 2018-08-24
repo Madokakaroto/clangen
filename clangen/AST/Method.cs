@@ -30,6 +30,5 @@ namespace clangen
             IsVirtual = isVirtual;
             IsAbstract = isAbstract;
         }
-        
     }
 }

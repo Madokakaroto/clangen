@@ -23,5 +23,12 @@ namespace clangen
              return type >= BasicType.UChar &&
                 type <= BasicType.UInt64;
         }
+
+        public static bool IsBuiltInType(BasicType type)
+        {
+            return type != BasicType.Object &&
+                type != BasicType.Enum &&
+                type != BasicType.Unknown;
+        }
     }
 }

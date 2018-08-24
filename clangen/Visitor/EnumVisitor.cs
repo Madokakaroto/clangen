@@ -55,17 +55,17 @@ namespace clangen
                 BasicType type = ClangTraits.ToBasicType(underlyingType);
 
                 // get enum constant value
-                EnumConstant c;
+                EnumField c;
                 if(ClangTraits.IsSigned(underlyingType))
                 {
                     long constantValue = clang.getEnumConstantDeclValue(cursor);
-                    c = EnumConstant.Create(constantName, type, constantValue);
+                    c = new EnumField(constantName, type, constantValue);
                 }
                 else
                 {
                     Debug.Assert(ClangTraits.IsUnsigned(underlyingType));
                     ulong constantValue = clang.getEnumConstantDeclUnsignedValue(cursor);
-                    c = EnumConstant.Create(constantName, type, constantValue);
+                    c = new EnumField(constantName, type, constantValue);
                 }
 
                 // add it to enumeration

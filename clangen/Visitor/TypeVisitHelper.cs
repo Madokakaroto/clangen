@@ -22,14 +22,24 @@ namespace clangen
                     if(ClangTraits.IsTerminalType(tmp))
                     {
                         nativeType.IsConst = isConst;
-                        nativeType.Type = ClangTraits.ToBasicType(tmp);
-
-                        if (ClangTraits.IsUserDefiendType(tmp))
+                        if(ClangTraits.IsBuiltInType(tmp))
+                        {
+                            nativeType.Info.SetBasicType(ClangTraits.ToBasicType(tmp));
+                        }
+                        else
                         {
                             CXCursor cursor = clang.getTypeDeclaration(tmp);
                             CXType theType = clang.getCursorType(cursor);
                             string removeQualifierName = clang.getTypeSpelling(theType).ToString();
-                            nativeType.Class = ast.GetClass(removeQualifierName);
+
+                            if (ClangTraits.IsEnum(tmp))
+                            {
+                                nativeType.Info.SetEnum(ast.GetEnum(removeQualifierName));
+                            }
+                            else
+                            {
+                                nativeType.Info.SetClass(ast.GetClass(removeQualifierName));
+                            }
                         }
                     }
                     else if(ClangTraits.IsTypedef(tmp))

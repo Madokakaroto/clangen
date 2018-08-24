@@ -1,10 +1,11 @@
 ﻿using System;
-using ClangSharp;
 using System.IO;
+using ClangSharp;
+using System.Runtime.InteropServices;
 
 namespace clangen
 {
-     public static class Extensions
+    public static class Extensions
     {
         /// <summary>
         /// Get the array slice between the two indexes.
