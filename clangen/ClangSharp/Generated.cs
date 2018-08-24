@@ -2101,7 +2101,7 @@
         public static extern void annotateTokens(CXTranslationUnit @TU, out CXToken @Tokens, uint @NumTokens, out CXCursor @Cursors);
 
         [DllImport(libraryPath, EntryPoint = "clang_disposeTokens", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void disposeTokens(CXTranslationUnit @TU, out CXToken @Tokens, uint @NumTokens);
+        public static extern void disposeTokens(CXTranslationUnit @TU, IntPtr @Tokens, uint @NumTokens);
 
         [DllImport(libraryPath, EntryPoint = "clang_getCursorKindSpelling", CallingConvention = CallingConvention.Cdecl)]
         public static extern CXString getCursorKindSpelling(CXCursorKind @Kind);

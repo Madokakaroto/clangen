@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Collections.Generic;
+
 namespace clangen
 {
     public class Method
@@ -13,6 +15,10 @@ namespace clangen
 
         public bool IsOverload { get; set; }
         public bool IsOverride { get; set; }
+
+        public List<FunctionParameter> ParamList { get; }
+            = new List<FunctionParameter>();
+        public NativeType ResultType { get; set; }
 
         public Method(
             NativeClass @class,
@@ -29,6 +35,11 @@ namespace clangen
             IsConst = isConst;
             IsVirtual = isVirtual;
             IsAbstract = isAbstract;
+        }
+
+        public void AddParameter(FunctionParameter param)
+        {
+            ParamList.Add(param);
         }
     }
 }

@@ -152,5 +152,11 @@ namespace clangen
         {
             return (AccessSpecifier)(accessSpecifier);
         }
+
+        public static bool IsLiteralCursor(CXCursor cursor)
+        {
+            return cursor.kind >= CXCursorKind.CXCursor_IntegerLiteral &&
+                cursor.kind <= CXCursorKind.CXCursor_CharacterLiteral;
+        }
     }
 }

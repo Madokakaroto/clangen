@@ -1,7 +1,8 @@
 ﻿using System;
 using clangen;
+using ClangSharp;
 
-namespace ClangSharp
+namespace clangen
 {
     interface IASTVisitor
     {

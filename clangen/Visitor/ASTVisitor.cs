@@ -6,8 +6,13 @@ namespace clangen
 {
     class ASTVisitor
     {
+        static public CXTranslationUnit CurrentTU { get; private set; }
+
         public AST Visit(CXTranslationUnit TU)
         {
+            // set current
+            CurrentTU = TU;
+
             // root cursor
             CXCursor root = clang.getTranslationUnitCursor(TU);
 

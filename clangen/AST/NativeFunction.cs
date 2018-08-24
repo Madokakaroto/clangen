@@ -1,19 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using ClangSharp;
 
 namespace clangen
 {
-    struct FunctionParameter
+    public class FunctionParameter
     {
         public string Name { get; set; }
         public NativeType Type { get; set; }
-        public object DefaultValue { get; set; }
+        public string DefaultValue { get; set; }
     }
 
-    class NativeFunction
+    public class NativeFunction
     {
         public string Name { get; }
         public bool IsOverload { get; }

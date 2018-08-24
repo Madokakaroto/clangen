@@ -102,12 +102,66 @@ namespace clangen
             bool isVirtual = clang.CXXMethod_isVirtual(cursor) != 0;
             bool isAbastrct = clang.CXXMethod_isPureVirtual(cursor) != 0;
 
+            // create method
             Method memberFunc = new Method( thisClass,
                 name, isStataic, isConst, isVirtual, isAbastrct);
 
-            thisClass.AddMethod(memberFunc);
+            // proces result type
+            CXType resultType = clang.getCursorResultType(cursor);
+            memberFunc.ResultType = TypeVisitHelper.GetNativeType(AST_, resultType);
 
-            // TODO deep iterate
+            // deep visit children
+            GCHandle astHandle = GCHandle.Alloc(memberFunc);
+            clang.visitChildren(cursor, MethodChildVisitor, new CXClientData((IntPtr)astHandle));
+
+            // register method
+            thisClass.AddMethod(memberFunc);
+        }
+
+        private CXChildVisitResult MethodChildVisitor(CXCursor cursor, CXCursor parent, IntPtr data)
+        {
+            if(CXCursorKind.CXCursor_ParmDecl == cursor.kind)
+            {
+                // prepare client data
+                GCHandle astHandle = (GCHandle)data;
+                Method thisMethod = astHandle.Target as Method;
+
+                CXType type = clang.getCursorType(cursor);
+
+                FunctionParameter param = new FunctionParameter
+                {
+                    Name = clang.getCursorSpelling(cursor).ToString(),
+                    Type = TypeVisitHelper.GetNativeType(AST_, type)
+                };
+
+                clang.visitChildren(cursor, (CXCursor c, CXCursor p, IntPtr d) => 
+                {
+                    if(ClangTraits.IsLiteralCursor(c))
+                    {
+                        // get liter-string from token
+                        CXSourceRange range = clang.getCursorExtent(c);
+                        IntPtr tokens;
+                        uint numToken;
+                        string liter = "";
+                        clang.tokenize(ASTVisitor.CurrentTU, range, out tokens, out numToken);
+                        IntPtr tmp = tokens;
+                        for (uint loop = 0; loop < numToken; ++loop, IntPtr.Add(tmp, 1))
+                        {
+                            CXToken token = Marshal.PtrToStructure<CXToken>(tmp);
+                            liter += clang.getTokenSpelling(ASTVisitor.CurrentTU, token).ToString();
+                        }
+                        clang.disposeTokens(ASTVisitor.CurrentTU, tokens, numToken);
+
+                        // set default literal
+                        param.DefaultValue = liter;
+                    }
+                    return CXChildVisitResult.CXChildVisit_Continue;
+                }, new CXClientData(IntPtr.Zero));
+
+                thisMethod.AddParameter(param);
+            }
+
+            return CXChildVisitResult.CXChildVisit_Recurse;
         }
 
         private void ProcessClassDetail(
