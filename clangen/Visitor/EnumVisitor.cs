@@ -26,10 +26,10 @@ namespace clangen
                 @enum.IsEnumClass = clang.EnumDecl_isScoped(cursor) != 0;
 
                 // create IntPtr for context
-                GCHandle astHandle = GCHandle.Alloc(@enum);
+                GCHandle enumHandle = GCHandle.Alloc(@enum);
 
                  // visit children
-                clang.visitChildren(cursor, Visitor, new CXClientData((IntPtr)astHandle));
+                clang.visitChildren(cursor, Visitor, new CXClientData((IntPtr)enumHandle));
 
                 // add class
                 AST_.AddEnum(@enum);
@@ -44,8 +44,8 @@ namespace clangen
             {
                 // prepare enumeration
                   // prepare client data
-                GCHandle astHandle = (GCHandle)data;
-                Enumeration thisEnum = astHandle.Target as Enumeration;
+                GCHandle enumHandle = (GCHandle)data;
+                Enumeration thisEnum = enumHandle.Target as Enumeration;
 
                 // get constant name
                 string constantName = clang.getCursorSpelling(cursor).ToString();

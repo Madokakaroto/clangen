@@ -7,6 +7,7 @@ namespace clangen
     class ASTVisitor
     {
         static public CXTranslationUnit CurrentTU { get; private set; }
+        private string Namespace = "";
 
         public AST Visit(CXTranslationUnit TU)
         {
@@ -56,11 +57,21 @@ namespace clangen
                     break;
                 // dealing with function
                 case CXCursorKind.CXCursor_FunctionDecl:
+                    visitor = new FunctionVisitor(ast, Namespace);
                     break;
                 case CXCursorKind.CXCursor_Namespace:
                     // ignore anonymous namespace
                     if (clang.Cursor_isAnonymous(cursor) != 0)
                         return CXChildVisitResult.CXChildVisit_Continue;
+                    else
+                    {
+                        string NS = clang.getCursorSpelling(parent).ToString();
+
+                        if(Namespace.Length == 0)
+                            Namespace += NS;
+                        else
+                            Namespace = Namespace + "::" + NS;
+                    }
                     return CXChildVisitResult.CXChildVisit_Recurse;
                 default:
                     // TODO ... any other

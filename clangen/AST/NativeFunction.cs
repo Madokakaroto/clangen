@@ -13,21 +13,17 @@ namespace clangen
     public class NativeFunction
     {
         public string Name { get; }
-        public bool IsOverload { get; }
+        public string TypeString { get; }
+        public bool IsOverload { get; set; }
 
-        public List<string> Namespaces { get; } = new List<string>();
-        public NativeType ReturnType { get; set; } = null;
+        public NativeType ResultType { get; set; } = null;
         public List<FunctionParameter> ParamList { get; } = new List<FunctionParameter>();
 
-        public NativeFunction(string name, bool isOverload = false)
+        public NativeFunction(string name, string type, bool isOverload = false)
         {
             Name = name;
+            TypeString = type;
             IsOverload = isOverload;
-        }
-
-        public bool IsVoidReturn()
-        {
-            return ReturnType == null;
         }
 
         public bool HasParam()
@@ -35,19 +31,9 @@ namespace clangen
             return ParamList.Count() != 0;
         }
 
-        public void AddParam(FunctionParameter param)
+        public void AddParameter(FunctionParameter param)
         {
             ParamList.Add(param);
-        }
-
-        public void PushNamespace(string @namespace)
-        {
-            Namespaces.Add(@namespace);
-        }
-
-        bool IsGlobal()
-        {
-            return Namespaces.Count() == 0;
         }
     }
 }

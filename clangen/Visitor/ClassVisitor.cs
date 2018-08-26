@@ -31,10 +31,10 @@ namespace clangen
                 ProcessClassDetail(@class, cursor, type);
 
                 // create IntPtr for context
-                GCHandle astHandle = GCHandle.Alloc(@class);
+                GCHandle classHandle = GCHandle.Alloc(@class);
 
                 // visit children
-                clang.visitChildren(cursor, Visitor, new CXClientData((IntPtr)astHandle));
+                clang.visitChildren(cursor, Visitor, new CXClientData((IntPtr)classHandle));
 
                 // add class
                 AST_.AddClass(@class);
@@ -46,8 +46,8 @@ namespace clangen
         private CXChildVisitResult Visitor(CXCursor cursor, CXCursor parent, IntPtr data)
         {
             // prepare client data
-            GCHandle astHandle = (GCHandle)data;
-            NativeClass thisClass = astHandle.Target as NativeClass;
+            GCHandle classHandle = (GCHandle)data;
+            NativeClass thisClass = classHandle.Target as NativeClass;
 
             CXCursorKind kind = clang.getCursorKind(cursor);
             switch(kind)

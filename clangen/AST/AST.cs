@@ -9,7 +9,9 @@ namespace clangen
         private Dictionary<string, NativeType> types_ = new Dictionary<string, NativeType>();
         private Dictionary<string, Enumeration> enums_ = new Dictionary<string, Enumeration>();
         private Dictionary<string, Enumeration> unsettledEnums_ = new Dictionary<string, Enumeration>();
+        private Dictionary<string, List<NativeFunction>> functions_ = new Dictionary<string, List<NativeFunction>>();
 
+        /* user defined type - class or struct */
         public NativeClass GetClass(string className, out bool unsettled)
         {
             if(classes_.ContainsKey(className))
@@ -44,6 +46,7 @@ namespace clangen
             }
         }
 
+        /* type */
         public NativeType GetType(string typeName, out bool unsettled)
         {
             if(types_.ContainsKey(typeName))
@@ -60,6 +63,7 @@ namespace clangen
             }
         }
 
+        /* enum */
         public Enumeration GetEnum(string enumName, out bool unsettled)
         {
             if(enums_.ContainsKey(enumName))
@@ -91,6 +95,41 @@ namespace clangen
             if(unsettledEnums_.ContainsKey(@enum.Name))
             {
                 unsettledEnums_.Remove(@enum.Name);
+            }
+        }
+
+        /* function */
+        public NativeFunction GetFunction(string name, string type, out bool unsettled)
+        {
+            if(functions_.ContainsKey(name))
+            {
+                List<NativeFunction> functions = functions_[name];
+                foreach(NativeFunction func in functions)
+                {
+                    if(func.TypeString == type)
+                    {
+                        unsettled = false;
+                        return func;
+                    }
+                }
+
+                NativeFunction newFunc = new NativeFunction(name, type, true);
+                if (functions.Count == 1)
+                {
+                    functions[0].IsOverload = true;
+                }
+                functions.Add(newFunc);
+                unsettled = true;
+                return newFunc;
+            }
+            else
+            {
+                List<NativeFunction> functions = new List<NativeFunction>();
+                functions_.Add(name, functions);
+                NativeFunction newFunc = new NativeFunction(name, type);
+                functions.Add(newFunc);
+                unsettled = true;
+                return newFunc;
             }
         }
     }
