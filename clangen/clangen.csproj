@@ -11,4 +11,8 @@
     <Folder Include="Template\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\DotLiquid\DotLiquid.csproj" />
+  </ItemGroup>
+
 </Project>
