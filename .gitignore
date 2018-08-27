@@ -1,4 +1,6 @@
 # Compiled Object files
 clangen/bin
 clangen/obj
+DotLiquid/bin
+DotLiquid/obj
 .vs
