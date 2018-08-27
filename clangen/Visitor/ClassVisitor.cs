@@ -77,11 +77,12 @@ namespace clangen
                 case CXCursorKind.CXCursor_StructDecl:
                 case CXCursorKind.CXCursor_ClassDecl:
                     // recursive visit child
-                    ClassVisitor subClassVisitor = new ClassVisitor(AST_);
+                    ClassVisitor subClassVisitor = new ClassVisitor(AST_, thisClass);
                     subClassVisitor.DoVisit(cursor, parent);
                     break;
                 case CXCursorKind.CXCursor_TypedefDecl:
                 case CXCursorKind.CXCursor_TypeAliasDecl:
+                    ProcessTypeExport(thisClass, cursor, parent);
                     break; 
                 default:
                     break;
@@ -92,19 +93,21 @@ namespace clangen
 
         private void ProcessBaseClass(NativeClass thisClass, CXCursor cursor, CXCursor parent)
         {
-            BaseClass baseClass = new BaseClass();
-
-            // get class
+            // get class name
             CXType type = clang.getCursorType(cursor);
             CXCursor typeDeclCursor = clang.getTypeDeclaration(type);
             string name = clang.getTypeSpelling(type).ToString();
-            baseClass.Class = AST_.GetClass(name);
-            
-            // check is virtual base
-            baseClass.IsVirtual = clang.CXXRecord_isAbstract(typeDeclCursor) != 0;
 
-            // check access specifier
-            baseClass.Access = ClangTraits.ToAccessSpecifier(clang.getCXXAccessSpecifier(cursor));
+            // create the base class
+            BaseClass baseClass = new BaseClass
+            {
+                // check access specifier
+                Access = ClangTraits.ToAccessSpecifier(clang.getCXXAccessSpecifier(cursor)),
+                // native class type
+                Class = AST_.GetClass(name),
+                // check is virtual base
+                IsVirtual = clang.CXXRecord_isAbstract(typeDeclCursor) != 0
+            };
 
             // register base class
             thisClass.AddBaseClass(baseClass);
@@ -218,8 +221,8 @@ namespace clangen
 
                 SubClass subClass = new SubClass
                 {
-                    Class = thisClass,
-                    Access = ClangTraits.ToAccessSpecifier(clang.getCXXAccessSpecifier(cursor))
+                    Access = ClangTraits.ToAccessSpecifier(clang.getCXXAccessSpecifier(cursor)),
+                    Class = thisClass
                 };
 
                 OwnerClass_.AddSubClass(subClass);
@@ -239,12 +242,33 @@ namespace clangen
             AccessSpecifier access = ClangTraits.ToAccessSpecifier(clang.getCXXAccessSpecifier(cursor));
 
             // create field object
-            Field f = new Field();
-            f.Access = access;
-            f.Type = nativeType;
-            f.IsStatic = isStatic;
+            Field f = new Field
+            {
+                Access = access,
+                Type = nativeType,
+                IsStatic = isStatic
+            };
 
             thisClass.AddField(fieldName, f);
+        }
+
+        private void ProcessTypeExport(NativeClass thisClass, CXCursor cursor, CXCursor parent)
+        {
+            // get field type
+            CXType type = clang.getCursorType(cursor);
+            NativeType nativeType = TypeVisitHelper.GetNativeType(AST_, type);
+
+            // get field access specifier
+            AccessSpecifier access = ClangTraits.ToAccessSpecifier(clang.getCXXAccessSpecifier(cursor));
+
+            // create the exported member type
+            MemberType memberType = new MemberType
+            {
+                Access = access,
+                Type = nativeType
+            };
+
+            thisClass.AddMemberType(memberType);
         }
     }
 }

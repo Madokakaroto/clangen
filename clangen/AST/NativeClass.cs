@@ -1,39 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Diagnostics;
 
 namespace clangen
 {
-    public enum StructOrClass
-    {
-        Struct = -1,
-        InDoubt = 0,
-        Class = 1,
-    }
-
-    public enum AccessSpecifier
-    {
-        Invalid,
-        Public,
-        Protected,
-        Private
-    }
-
-    public class BaseClass
-    {
-        public NativeClass Class;
-        public bool IsVirtual;
-        public AccessSpecifier Access;
-    }
-
-    public class SubClass
-    {
-        public NativeClass Class;
-        public AccessSpecifier Access;
-    }
-
     public class NativeClass
     {
         // auto property
@@ -54,6 +24,7 @@ namespace clangen
         // private data
         public List<BaseClass> BaseClasses { get; private set; } = new List<BaseClass>();
         public List<SubClass> SubClasses { get; private set; } = new List<SubClass>();
+        public List<MemberType> MemberTypes { get; private set; } = new List<MemberType>();
 
         private Dictionary<string, List<Method>> methods_
             = new Dictionary<string, List<Method>>();
@@ -73,6 +44,11 @@ namespace clangen
         public void AddSubClass(SubClass subClass)
         {
             SubClasses.Add(subClass);
+        }
+
+        public void AddMemberType(MemberType type)
+        {
+            MemberTypes.Add(type);
         }
 
         public void AddMethod(Method func)
