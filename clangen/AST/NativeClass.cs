@@ -21,10 +21,16 @@ namespace clangen
         Private
     }
 
-    public struct BaseClass
+    public class BaseClass
     {
         public NativeClass Class;
         public bool IsVirtual;
+        public AccessSpecifier Access;
+    }
+
+    public class SubClass
+    {
+        public NativeClass Class;
         public AccessSpecifier Access;
     }
 
@@ -43,10 +49,12 @@ namespace clangen
 
         // for sub class
         public bool IsSubClass { get; set; } = false;
-        public AccessSpecifier SubAccess { get; set; } = AccessSpecifier.Private;
+        public NativeClass OwnerClass { get; set; }
 
         // private data
-        private List<BaseClass> baseClasses_ = new List<BaseClass>();
+        public List<BaseClass> BaseClasses { get; private set; } = new List<BaseClass>();
+        public List<SubClass> SubClasses { get; private set; } = new List<SubClass>();
+
         private Dictionary<string, List<Method>> methods_
             = new Dictionary<string, List<Method>>();
         private Dictionary<string, Field> fields_
@@ -59,7 +67,12 @@ namespace clangen
 
         public void AddBaseClass(BaseClass baseClass)
         {
-            baseClasses_.Add(baseClass);
+            BaseClasses.Add(baseClass);
+        }
+
+        public void AddSubClass(SubClass subClass)
+        {
+            SubClasses.Add(subClass);
         }
 
         public void AddMethod(Method func)

@@ -41,9 +41,18 @@ namespace clangen
                     }
                     else if(ClangTraits.IsTypedef(tmp))
                     {
+                        // get type redirection
                         CXCursor typedefedCursor = clang.getTypeDeclaration(tmp);
                         CXType typedefedType = clang.getTypedefDeclUnderlyingType(typedefedCursor);
+
+                        // dealing with tempalte instantiation
+                        if (ClangTraits.IsUnexposedType(typedefedType))
+                        {
+                            typedefedCursor = clang.getTypeDeclaration(typedefedType);
+                            typedefedType = clang.getCursorType(typedefedCursor);
+                        }
                         NativeType typedefedNativeType = GetNativeType(ast, typedefedType);
+                        
                         nativeType.IsConst = isConst;
                         nativeType.SetTypedefedType(typedefedNativeType);
                     }

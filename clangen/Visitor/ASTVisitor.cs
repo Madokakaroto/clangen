@@ -73,6 +73,10 @@ namespace clangen
                             Namespace = Namespace + "::" + NS;
                     }
                     return CXChildVisitResult.CXChildVisit_Recurse;
+                case CXCursorKind.CXCursor_TypeAliasDecl:
+                case CXCursorKind.CXCursor_TypedefDecl:
+                    TypeVisitHelper.GetNativeType(ast, clang.getCursorType(cursor));
+                    break;
                 default:
                     // TODO ... any other
                     break;

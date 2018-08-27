@@ -89,9 +89,17 @@ namespace clangen
             return type.kind == CXTypeKind.CXType_Record;
         }
 
+        public static bool IsUnexposedType(CXType type)
+        {
+            return type.kind == CXTypeKind.CXType_Unexposed;
+        }
+
         public static bool IsTerminalType(CXType type)
         {
-            return IsBuiltInType(type) || IsEnum(type) || IsUserDefiendType(type);
+            return IsBuiltInType(type) || 
+                   IsEnum(type) || 
+                   IsUserDefiendType(type) ||
+                   IsUnexposedType(type);
         }
 
         public static bool IsTypedef(CXType type)

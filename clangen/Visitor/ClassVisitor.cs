@@ -8,10 +8,12 @@ namespace clangen
     class ClassVisitor : IASTVisitor
     {
         private AST AST_;
+        private NativeClass OwnerClass_;
 
-        public ClassVisitor(AST ast)
+        public ClassVisitor(AST ast, NativeClass owner = null)
         {
             AST_ = ast;
+            OwnerClass_ = owner;
         }
 
         public bool DoVisit(CXCursor cursor, CXCursor parent)
@@ -25,7 +27,12 @@ namespace clangen
             // get class object
             bool unsetteld = false;
             NativeClass @class = AST_.GetClass(className, out unsetteld);
-            if (unsetteld)
+
+            // is definition
+            bool isDefinition = clang.isCursorDefinition(cursor) != 0;
+
+            // dealing with defition and unsettled types
+            if (unsetteld && isDefinition)
             {
                 //proces class detail
                 ProcessClassDetail(@class, cursor, type, parent);
@@ -73,6 +80,9 @@ namespace clangen
                     ClassVisitor subClassVisitor = new ClassVisitor(AST_);
                     subClassVisitor.DoVisit(cursor, parent);
                     break;
+                case CXCursorKind.CXCursor_TypedefDecl:
+                case CXCursorKind.CXCursor_TypeAliasDecl:
+                    break; 
                 default:
                     break;
             }
@@ -202,8 +212,17 @@ namespace clangen
             // set subclass
             if(ClangTraits.IsUserDefinedTypeDecl(parent))
             {
+                Debug.Assert(OwnerClass_ != null);
                 thisClass.IsSubClass = true;
-                thisClass.SubAccess = ClangTraits.ToAccessSpecifier(clang.getCXXAccessSpecifier(cursor));
+                thisClass.OwnerClass = OwnerClass_;
+
+                SubClass subClass = new SubClass
+                {
+                    Class = thisClass,
+                    Access = ClangTraits.ToAccessSpecifier(clang.getCXXAccessSpecifier(cursor))
+                };
+
+                OwnerClass_.AddSubClass(subClass);
             }
         }
 
