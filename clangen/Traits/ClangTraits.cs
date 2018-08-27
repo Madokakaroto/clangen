@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Diagnostics;
 using ClangSharp;
 
 namespace clangen
@@ -157,6 +155,25 @@ namespace clangen
         {
             return cursor.kind >= CXCursorKind.CXCursor_IntegerLiteral &&
                 cursor.kind <= CXCursorKind.CXCursor_CharacterLiteral;
+        }
+
+        public static bool IsUserDefinedTypeDecl(CXCursor cursor)
+        {
+            return cursor.kind == CXCursorKind.CXCursor_ClassDecl ||
+                cursor.kind == CXCursorKind.CXCursor_StructDecl;
+        }
+
+        public static bool IsUserDefinedTypeDecl(CXCursorKind cursorKind)
+        {
+            return cursorKind == CXCursorKind.CXCursor_ClassDecl ||
+                cursorKind == CXCursorKind.CXCursor_StructDecl;
+        }
+
+        public static StructOrClass ToStructOrClass(CXCursorKind kind)
+        {
+            Debug.Assert(IsUserDefinedTypeDecl(kind));
+            return kind == CXCursorKind.CXCursor_ClassDecl ?
+                StructOrClass.Class : StructOrClass.Struct;
         }
     }
 }

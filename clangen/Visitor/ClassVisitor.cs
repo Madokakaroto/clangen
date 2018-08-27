@@ -28,7 +28,7 @@ namespace clangen
             if (unsetteld)
             {
                 //proces class detail
-                ProcessClassDetail(@class, cursor, type);
+                ProcessClassDetail(@class, cursor, type, parent);
 
                 // create IntPtr for context
                 GCHandle classHandle = GCHandle.Alloc(@class);
@@ -66,6 +66,12 @@ namespace clangen
                     break;
                 case CXCursorKind.CXCursor_CXXFinalAttr:
                     thisClass.IsFinal = true;
+                    break;
+                case CXCursorKind.CXCursor_StructDecl:
+                case CXCursorKind.CXCursor_ClassDecl:
+                    // recursive visit child
+                    ClassVisitor subClassVisitor = new ClassVisitor(AST_);
+                    subClassVisitor.DoVisit(cursor, parent);
                     break;
                 default:
                     break;
@@ -167,24 +173,18 @@ namespace clangen
         private void ProcessClassDetail(
             NativeClass thisClass,              // this class to parse
             CXCursor cursor,                    // current cursor
-            CXType type                         // current cursor type
+            CXType type,                        // current cursor type
+            CXCursor parent                     // parent cursor
             )
         {
-            // check cursor kind
-            CXCursorKind cursorKind = cursor.kind;
-            Debug.Assert(
-                cursorKind == CXCursorKind.CXCursor_ClassDecl ||
-                cursorKind == CXCursorKind.CXCursor_StructDecl);
-
             // set struct or class
-            thisClass.ClassTag = cursorKind == CXCursorKind.CXCursor_ClassDecl ?
-                StructOrClass.Class : StructOrClass.Struct;
+            thisClass.ClassTag = ClangTraits.ToStructOrClass(cursor.kind);
 
             // abstract
             thisClass.IsAbstract = clang.CXXRecord_isAbstract(cursor) != 0;
 
             // virtual base
-            thisClass.IsVirtualBae = clang.isVirtualBase(cursor) != 0;
+            thisClass.IsVirtualBase = clang.isVirtualBase(cursor) != 0;
 
             // set template instance info
             int templateNum = clang.Type_getNumTemplateArguments(type);
@@ -197,6 +197,13 @@ namespace clangen
                     NativeType nativeType = TypeVisitHelper.GetNativeType(AST_, argType);
                     thisClass.SetTemplateParameter((uint)loop, nativeType);
                 }
+            }
+
+            // set subclass
+            if(ClangTraits.IsUserDefinedTypeDecl(parent))
+            {
+                thisClass.IsSubClass = true;
+                thisClass.SubAccess = ClangTraits.ToAccessSpecifier(clang.getCXXAccessSpecifier(cursor));
             }
         }
 

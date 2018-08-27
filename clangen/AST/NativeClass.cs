@@ -35,9 +35,15 @@ namespace clangen
         public StructOrClass ClassTag { get; set; } = StructOrClass.InDoubt;
         public bool IsFinal { get; set; } = false;
         public bool IsAbstract { get; set; } = false;
-        public bool IsVirtualBae { get; set; } = false;
+        public bool IsVirtualBase { get; set; } = false;
+
+        // for full specialization
         public bool IsTemplateInstance { get; private set; } = false;
         public NativeType[] TemplateParameters { get; private set; } = null;
+
+        // for sub class
+        public bool IsSubClass { get; set; } = false;
+        public AccessSpecifier SubAccess { get; set; } = AccessSpecifier.Private;
 
         // private data
         private List<BaseClass> baseClasses_ = new List<BaseClass>();
