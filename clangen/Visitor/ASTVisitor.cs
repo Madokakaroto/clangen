@@ -76,6 +76,30 @@ namespace clangen
                 case CXCursorKind.CXCursor_TypeAliasDecl:
                 case CXCursorKind.CXCursor_TypedefDecl:
                     TypeVisitHelper.GetNativeType(ast, clang.getCursorType(cursor));
+
+                    //string name = clang.getCursorDisplayName(c).ToString();
+                    //clang.visitChildren(cursor, (CXCursor c, CXCursor p, IntPtr d) =>
+                    //{
+                    //    string name = clang.getCursorDisplayName(cursor).ToString();
+                    //    CXCursor c1 = clang.getCursorReferenced(c);
+                    //    string nameUSR = clang.getCursorUSR(c1).ToString();
+                    //    CXSourceLocation loc = clang.getCursorLocation(c1);
+                    //
+                    //    CXFile f = new CXFile();
+                    //    uint line;
+                    //    uint col;
+                    //    uint offset;
+                    //    clang.getSpellingLocation(loc, out f, out line, out col, out offset);
+                    //    CXType t1 = clang.getCursorType(c);
+                    //    return CXChildVisitResult.CXChildVisit_Recurse;
+                    //}, new CXClientData(IntPtr.Zero));
+                    break;
+                case CXCursorKind.CXCursor_ClassTemplate:
+                    visitor = new ClassTemplateVisitor(ast);
+                    break;
+                case CXCursorKind.CXCursor_ClassTemplatePartialSpecialization:
+                    break;
+                case CXCursorKind.CXCursor_FunctionTemplate:
                     break;
                 default:
                     // TODO ... any other
@@ -90,7 +114,7 @@ namespace clangen
                 }
             }
 
-            // deep already in sub visitors
+            // deep iteratoring in sub visitor
             return CXChildVisitResult.CXChildVisit_Continue;
         }
     }

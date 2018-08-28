@@ -1,4 +1,5 @@
 ﻿using ClangSharp;
+using System;
 
 namespace clangen
 {
@@ -29,6 +30,11 @@ namespace clangen
                             CXType theType = clang.getCursorType(cursor);
                             string removeQualifierName = clang.getTypeSpelling(theType).ToString();
 
+                            //if(ClangTraits.IsUnexposedType(tmp))
+                            //{
+                            //    CXCursor ccc = clang.getSpecializedCursorTemplate(cursor);
+                            //}
+
                             if (ClangTraits.IsEnum(tmp))
                             {
                                 nativeType.Info.SetEnum(ast.GetEnum(removeQualifierName));
@@ -48,8 +54,9 @@ namespace clangen
                         // dealing with tempalte instantiation
                         if (ClangTraits.IsUnexposedType(typedefedType))
                         {
-                            typedefedCursor = clang.getTypeDeclaration(typedefedType);
-                            typedefedType = clang.getCursorType(typedefedCursor);
+                            CXCursor instanceCursor = clang.getTypeDeclaration(typedefedType);
+                            CXCursor templateCursor = clang.getSpecializedCursorTemplate(instanceCursor);
+
                         }
                         NativeType typedefedNativeType = GetNativeType(ast, typedefedType);
                         

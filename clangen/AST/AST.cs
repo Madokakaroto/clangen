@@ -33,8 +33,7 @@ namespace clangen
 
         public NativeClass GetClass(string className)
         {
-            bool dummy = false;
-            return GetClass(className, out dummy);
+            return GetClass(className, out bool dummy);
         }
 
         public void AddClass(NativeClass @class)
@@ -85,8 +84,7 @@ namespace clangen
 
         public Enumeration GetEnum(string enumName)
         {
-            bool dummy = false;
-            return GetEnum(enumName, out dummy);
+            return GetEnum(enumName, out bool dummy);
         }
 
         public void AddEnum(Enumeration @enum)
