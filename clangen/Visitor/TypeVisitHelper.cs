@@ -8,9 +8,9 @@ namespace clangen
         static public NativeType GetNativeType(AST ast, CXType type)
         {
             string typeName = clang.getTypeSpelling(type).ToString();
-            bool unsetteld = false;
-            NativeType nativeType = ast.GetType(typeName, out unsetteld);
-            if(unsetteld)
+
+            NativeType nativeType = ast.GetType(typeName);
+            if(!nativeType.Parsed)
             {
                 CXType tmp = type;
                 while (!ClangTraits.IsInvalid(tmp))
@@ -84,6 +84,8 @@ namespace clangen
 
                     tmp = clang.getPointeeType(tmp);
                 }
+
+                nativeType.Parsed = true;
             }
             return nativeType;
         }

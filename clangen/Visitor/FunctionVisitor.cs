@@ -21,9 +21,8 @@ namespace clangen
             string functionName = namespace_ + cursorName;
             string functionTypeName = clang.getCursorDisplayName(cursor).ToString();
 
-            bool unsettled = false;
-            NativeFunction function = AST_.GetFunction(functionName, functionTypeName, out unsettled);
-            if(unsettled)
+            NativeFunction function = AST_.GetFunction(functionName, functionTypeName);
+            if(!function.Parsed)
             {
                 // proces result type
                 CXType resultType = clang.getCursorResultType(cursor);

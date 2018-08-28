@@ -97,16 +97,17 @@ namespace clangen
             Type = BasicType.Enum;
             Info = @enum;
         }
-
-
     }
 
     public class NativeType
     {
         // property
+        public string TypeName { get; }
+        public bool Parsed { get; set; } = false;
+
         public TypeInfo Info { get; private set; }
         public TypeQualifiers Qualifiers { get; } = new TypeQualifiers();
-        public string TypeName { get; }
+        
         public bool IsConst { get; set; } = false;
         public bool IsTypedefed { get; private set; } = false;
         public NativeType TypedefedType { get; private set; } = null;

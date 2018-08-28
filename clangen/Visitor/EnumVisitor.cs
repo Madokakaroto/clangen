@@ -18,9 +18,8 @@ namespace clangen
         {
             string name = clang.getCursorSpelling(cursor).ToString();
 
-            bool unsettled = false;
-            Enumeration @enum = AST_.GetEnum(name, out unsettled);
-            if(unsettled)
+            Enumeration @enum = AST_.GetEnum(name);
+            if(!@enum.Parsed)
             {
                 // is scoped
                 @enum.IsEnumClass = clang.EnumDecl_isScoped(cursor) != 0;
@@ -32,7 +31,7 @@ namespace clangen
                 clang.visitChildren(cursor, Visitor, new CXClientData((IntPtr)enumHandle));
 
                 // add class
-                AST_.AddEnum(@enum);
+                @enum.Parsed = true;
             }
 
             return true;

@@ -5,99 +5,57 @@ namespace clangen
     public class AST
     {
         private Dictionary<string, NativeClass> classes_ = new Dictionary<string, NativeClass>();
-        private Dictionary<string, NativeClass> unsettledClasses_ = new Dictionary<string, NativeClass>();
         private Dictionary<string, NativeType> types_ = new Dictionary<string, NativeType>();
         private Dictionary<string, Enumeration> enums_ = new Dictionary<string, Enumeration>();
-        private Dictionary<string, Enumeration> unsettledEnums_ = new Dictionary<string, Enumeration>();
         private Dictionary<string, List<NativeFunction>> functions_ = new Dictionary<string, List<NativeFunction>>();
 
         /* user defined type - class or struct */
-        public NativeClass GetClass(string className, out bool unsettled)
+        public NativeClass GetClass(string className)
         {
             if(classes_.ContainsKey(className))
             {
-                unsettled = false;
                 return classes_[className];
             }
             else
             {
-                if(!unsettledClasses_.ContainsKey(className))
-                {
-                    unsettledClasses_.Add(className, new NativeClass(className));
-                }
-
-                unsettled = true;
-                return unsettledClasses_[className];
-            }
-        }
-
-        public NativeClass GetClass(string className)
-        {
-            return GetClass(className, out bool dummy);
-        }
-
-        public void AddClass(NativeClass @class)
-        {
-            classes_.Add(@class.Name, @class);
-            if(unsettledClasses_.ContainsKey(@class.Name))
-            {
-                unsettledClasses_.Remove(@class.Name);
+                NativeClass newClass = new NativeClass(className);
+                classes_.Add(className, newClass);
+                return newClass;
             }
         }
 
         /* type */
-        public NativeType GetType(string typeName, out bool unsettled)
+        public NativeType GetType(string typeName)
         {
             if(types_.ContainsKey(typeName))
             {
-                unsettled = false;
                 return types_[typeName];
             }
             else
             {
                 NativeType type = new NativeType(typeName);
                 types_.Add(typeName, type);
-                unsettled = true;
                 return type;
             }
         }
 
         /* enum */
-        public Enumeration GetEnum(string enumName, out bool unsettled)
+        public Enumeration GetEnum(string enumName)
         {
             if(enums_.ContainsKey(enumName))
             {
-                unsettled = false;
                 return enums_[enumName];
             }
             else
             {
-                if(!unsettledEnums_.ContainsKey(enumName))
-                {
-                    unsettledEnums_.Add(enumName, new Enumeration(enumName));
-                }
-
-                unsettled = true;
-                return unsettledEnums_[enumName];
-            }
-        }
-
-        public Enumeration GetEnum(string enumName)
-        {
-            return GetEnum(enumName, out bool dummy);
-        }
-
-        public void AddEnum(Enumeration @enum)
-        {
-            enums_.Add(@enum.Name, @enum);
-            if(unsettledEnums_.ContainsKey(@enum.Name))
-            {
-                unsettledEnums_.Remove(@enum.Name);
+                Enumeration @enum = new Enumeration(enumName);
+                enums_.Add(enumName, @enum);
+                return @enum;
             }
         }
 
         /* function */
-        public NativeFunction GetFunction(string name, string type, out bool unsettled)
+        public NativeFunction GetFunction(string name, string type)
         {
             if(functions_.ContainsKey(name))
             {
@@ -106,7 +64,6 @@ namespace clangen
                 {
                     if(func.TypeString == type)
                     {
-                        unsettled = false;
                         return func;
                     }
                 }
@@ -117,7 +74,6 @@ namespace clangen
                     functions[0].IsOverload = true;
                 }
                 functions.Add(newFunc);
-                unsettled = true;
                 return newFunc;
             }
             else
@@ -126,7 +82,6 @@ namespace clangen
                 functions_.Add(name, functions);
                 NativeFunction newFunc = new NativeFunction(name, type);
                 functions.Add(newFunc);
-                unsettled = true;
                 return newFunc;
             }
         }

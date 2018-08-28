@@ -13,6 +13,7 @@ namespace clangen
     public class NativeFunction
     {
         public string Name { get; }
+        public bool Parsed { get; set; } = false;
         public string TypeString { get; }
         public bool IsOverload { get; set; }
 

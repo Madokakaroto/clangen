@@ -8,6 +8,7 @@ namespace clangen
     {
         // auto property
         public string Name { get; }
+        public bool Parsed { get; set; } = false;
         public StructOrClass ClassTag { get; set; } = StructOrClass.InDoubt;
         public bool IsFinal { get; set; } = false;
         public bool IsAbstract { get; set; } = false;
@@ -17,9 +18,10 @@ namespace clangen
         public bool IsTemplateInstance { get; private set; } = false;
         public NativeType[] TemplateParameters { get; private set; } = null;
 
-        // for sub class
-        public bool IsSubClass { get; set; } = false;
-        public NativeClass OwnerClass { get; set; }
+        // for embedded class
+        public bool IsEmbedded { get; set; } = false;
+        public NativeClass OwnerClass { get; set; } = null;
+        public AccessSpecifier Access { get; set; } = AccessSpecifier.Private;
 
         // private data
         public List<BaseClass> BaseClasses { get; private set; } = new List<BaseClass>();

@@ -113,9 +113,15 @@ namespace clangen
     public class Enumeration
     {
         public string Name { get; }
+        public bool Parsed { get; set; } = false;
         private Dictionary<string, EnumField> constants_ 
             = new Dictionary<string, EnumField>();
         public bool IsEnumClass { get; set; } = false;
+        
+        // for embedded 
+        public bool IsEmbedded { get; set; } = false;
+        public AccessSpecifier Access { get; set; } = AccessSpecifier.Private;
+        public NativeClass OwnerClass { get; set; } = null;
 
         public Enumeration(string name)
         {
