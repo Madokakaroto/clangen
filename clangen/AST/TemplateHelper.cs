@@ -45,30 +45,36 @@ namespace clangen
     public class TemplateParameter
     {
         public string Name { get; }
-        private BasicType type_;
+        public NativeType Type{ get; }
         public bool IsTemplate { get; private set;  } = false;
         public TemplateProto Template { get; private set; } = null;
 
         public string Signature { get { return GetSignature(false); } }
         public string NamedSignature { get { return GetSignature(true); } }
-        public bool IsNonType { get { return type_ != BasicType.Unknown; } }
+        public bool IsNonType { get { return Type != null; } }
 
-        TemplateParameter(string name, BasicType type)
+        public TemplateParameter(string name, NativeType type = null)
         {
-            //Debug.Assert()
-
             Name = name;
-
+            Type = type;
         }
 
         public string GetSignature(bool withParamName)
         {
             string result;
-            if (!IsTemplate)
+
+            // format template parameter signature
+            if(IsNonType)
+                result = string.Format("{0} ", Type.CollaspedName);
+            else if (!IsTemplate)
                 result = "typename ";
             else
                 result = Template.GetSignature(withParamName, true);
-            if (withParamName) result += Name;
+
+            // add template parameter spelling
+            if (withParamName && Name.Length > 0) 
+                result += Name;
+
             return result;
         }
     }

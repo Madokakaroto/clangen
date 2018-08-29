@@ -34,9 +34,13 @@ namespace clangen
             switch (kind)
             {
                 case CXCursorKind.CXCursor_TemplateTypeParameter:
-                    //clang.Cursor_getTemplateArgumentType
+                    string paramName = clang.getCursorSpelling(cursor).ToString();
+                    TemplateParameter param = new TemplateParameter(paramName);
+                    tp_.AddTemplateParameter(param);
                     break;
                 case CXCursorKind.CXCursor_NonTypeTemplateParameter:
+                    CXType type = clang.getCursorType(cursor);
+                    NativeType nativeType = TypeVisitor.GetNativeType(AST_, type);
                     break;
                 case CXCursorKind.CXCursor_TemplateTemplateParameter:
                     return CXChildVisitResult.CXChildVisit_Recurse;

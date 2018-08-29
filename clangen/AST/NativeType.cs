@@ -74,9 +74,8 @@ namespace clangen
         public QulifierType Qualifier { get; set; }
         
         public bool IsConst { get; set; } = false;
-        public bool IsTypedefed { get; private set; } = false;
-        public NativeType TypedefedType { get; private set; } = null;
-        private string collaspedName_ = "";
+        public NativeType ReferencedType { get; private set; } = null;
+        public string CollaspedName { get{ return GenerateColloaspedName(); } }
 
         public NativeType(string typeName)
         {
@@ -84,29 +83,23 @@ namespace clangen
             Info = new TypeInfo();
         }
 
-        public void SetTypedefedType(NativeType type)
+        public void SetReferencedType(NativeType type)
         {
             Debug.Assert(type != null);
-            IsTypedefed = true;
-            TypedefedType = type;
+            ReferencedType = type;
         }
 
         public string GetCollaspedName()
         {
-            if(collaspedName_.Length == 0)
-            {
-                collaspedName_ = GenerateColloaspedName();
-            }
-
-            return collaspedName_;
+            return GenerateColloaspedName();
         }
 
         private string GenerateColloaspedName()
         {
-            if (IsTypedefed)
+            if (ReferencedType != null)
             {
-                Debug.Assert(TypedefedType != null);
-                string collaspedName = TypedefedType.GetCollaspedName();
+                Debug.Assert(ReferencedType != null);
+                string collaspedName = ReferencedType.CollaspedName;
 
                 if (IsConst)
                     collaspedName += " const";

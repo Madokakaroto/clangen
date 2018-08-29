@@ -126,8 +126,9 @@ namespace clangen
                 case CXTypeKind.CXType_UShort:
                     return BasicType.UInt16;
                 case CXTypeKind.CXType_UInt:
-                    return BasicType.UInt32;
                 case CXTypeKind.CXType_ULong:
+                    return BasicType.UInt32;
+                case CXTypeKind.CXType_ULongLong:
                     return BasicType.UInt64;
                 case CXTypeKind.CXType_Char_S:
                 case CXTypeKind.CXType_SChar:
@@ -136,8 +137,9 @@ namespace clangen
                 case CXTypeKind.CXType_Short:
                     return BasicType.Int16;
                 case CXTypeKind.CXType_Int:
-                    return BasicType.Int32;
                 case CXTypeKind.CXType_Long:
+                    return BasicType.Int32;
+                case CXTypeKind.CXType_LongLong:
                     return BasicType.Int64;
                 case CXTypeKind.CXType_Float:
                     return BasicType.Float;
