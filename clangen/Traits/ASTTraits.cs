@@ -30,5 +30,15 @@ namespace clangen
                 type != BasicType.Enum &&
                 type != BasicType.Unknown;
         }
+
+        public static bool IsEnum(BasicType type)
+        {
+            return type == BasicType.Enum;
+        }
+
+        public static bool IsTemplateParamType(NativeType type)
+        {
+            return false;
+        }
     }
 }

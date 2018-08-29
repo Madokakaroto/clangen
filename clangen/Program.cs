@@ -50,7 +50,8 @@ namespace clangen
             CXTranslationUnit TU;
             string[] @params = args.Slice(1);
 
-            uint option = clang.defaultEditingTranslationUnitOptions();
+            uint option = clang.defaultEditingTranslationUnitOptions() 
+                | (uint)CXTranslationUnit_Flags.CXTranslationUnit_SkipFunctionBodies;
 
             CXUnsavedFile unsavedFile = new CXUnsavedFile();
             var error = clang.parseTranslationUnit2(Index, args[0], @params, @params.Length, out unsavedFile, 0,

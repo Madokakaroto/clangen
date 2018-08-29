@@ -28,45 +28,10 @@ namespace clangen
 
     public enum QulifierType
     {
+        Unknown,
         LRef,
         RRef,
-        Ptr,
-        ConstPtr,
-    }
-
-    public class TypeQualifiers
-    {
-        private Stack<QulifierType> qulifiers;
-
-        public TypeQualifiers()
-        {
-            qulifiers = new Stack<QulifierType>();
-        }
-
-        public void PushLValueReference()
-        {
-            qulifiers.Push(QulifierType.LRef);
-        }
-
-        public void PushRValueReference()
-        {
-            qulifiers.Push(QulifierType.RRef);
-        }
-
-        public void PushPointer()
-        {
-            qulifiers.Push(QulifierType.Ptr);
-        }
-
-        public void PushConstPointer()
-        {
-            qulifiers.Push(QulifierType.ConstPtr);
-        }
-
-        public Stack<QulifierType> GetStack()
-        {
-            return qulifiers;
-        }
+        Ptr
     }
 
     public class TypeInfo
@@ -106,7 +71,7 @@ namespace clangen
         public bool Parsed { get; set; } = false;
 
         public TypeInfo Info { get; private set; }
-        public TypeQualifiers Qualifiers { get; } = new TypeQualifiers();
+        public QulifierType Qualifier { get; set; }
         
         public bool IsConst { get; set; } = false;
         public bool IsTypedefed { get; private set; } = false;
@@ -146,23 +111,17 @@ namespace clangen
                 if (IsConst)
                     collaspedName += " const";
 
-                foreach (QulifierType qType in Qualifiers.GetStack())
+                switch (Qualifier)
                 {
-                    switch (qType)
-                    {
-                        case QulifierType.LRef:
-                            collaspedName += "&";
-                            break;
-                        case QulifierType.RRef:
-                            collaspedName += "&&";
-                            break;
-                        case QulifierType.Ptr:
-                            collaspedName += "*";
-                            break;
-                        case QulifierType.ConstPtr:
-                            collaspedName += "* const";
-                            break;
-                    }
+                    case QulifierType.LRef:
+                        collaspedName += "&";
+                        break;
+                    case QulifierType.RRef:
+                        collaspedName += "&&";
+                        break;
+                    case QulifierType.Ptr:
+                        collaspedName += "*";
+                        break;
                 }
 
                 return collaspedName;

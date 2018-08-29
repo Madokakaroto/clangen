@@ -1,13 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using ClangSharp;
 
 namespace clangen
 {
-    class ASTVisitor
+    public class ASTVisitor
     {
         static public CXTranslationUnit CurrentTU { get; private set; }
-        //private string Namespace = "";
+        private List<string> namespaces_ = new List<string>();
+        public string CurrentNamespace { get { return string.Join("::", namespaces_); } }
 
         public AST Visit(CXTranslationUnit TU)
         {
@@ -63,23 +65,16 @@ namespace clangen
                     // ignore anonymous namespace
                     if (clang.Cursor_isAnonymous(cursor) != 0)
                         return CXChildVisitResult.CXChildVisit_Continue;
-                    //else
-                    //{
-                    //    string NS = clang.getCursorSpelling(parent).ToString();
-                    //
-                    //    if(Namespace.Length == 0)
-                    //        Namespace += NS;
-                    //    else
-                    //        Namespace = Namespace + "::" + NS;
-                    //}
-                    return CXChildVisitResult.CXChildVisit_Recurse;
+
+                    ProcessNamespace(cursor, data);
+                    return CXChildVisitResult.CXChildVisit_Continue;
                 case CXCursorKind.CXCursor_TypeAliasDecl:
                 case CXCursorKind.CXCursor_TypedefDecl:
-                    TypeVisitHelper.GetNativeType(ast, clang.getCursorType(cursor));
+                    TypeVisitor.GetNativeType(ast, clang.getCursorType(cursor));
                     break;
                 case CXCursorKind.CXCursor_ClassTemplate:
                 case CXCursorKind.CXCursor_ClassTemplatePartialSpecialization:
-                    visitor = new ClassTemplateVisitor(ast);
+                    visitor = new ClassTemplateVisitor(ast, this);
                     break;
                 case CXCursorKind.CXCursor_FunctionTemplate:
                     break;
@@ -98,6 +93,18 @@ namespace clangen
 
             // deep iteratoring in sub visitor
             return CXChildVisitResult.CXChildVisit_Continue;
+        }
+
+        private void ProcessNamespace(CXCursor cursor, IntPtr data)
+        {
+            string namespaceName = clang.getCursorSpelling(cursor).ToString();
+            // push namespace
+            namespaces_.Add(namespaceName);
+            // visit child
+            clang.visitChildren(cursor, Visitor, new CXClientData(data));
+            // pop namespace
+            int size = namespaces_.Count - 1;
+            namespaces_.RemoveAt(size);
         }
     }
 }

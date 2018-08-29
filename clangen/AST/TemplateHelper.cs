@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace clangen
 {
@@ -46,15 +45,20 @@ namespace clangen
     public class TemplateParameter
     {
         public string Name { get; }
+        private BasicType type_;
         public bool IsTemplate { get; private set;  } = false;
         public TemplateProto Template { get; private set; } = null;
 
         public string Signature { get { return GetSignature(false); } }
         public string NamedSignature { get { return GetSignature(true); } }
+        public bool IsNonType { get { return type_ != BasicType.Unknown; } }
 
-        TemplateParameter(string name)
+        TemplateParameter(string name, BasicType type)
         {
+            //Debug.Assert()
+
             Name = name;
+
         }
 
         public string GetSignature(bool withParamName)
