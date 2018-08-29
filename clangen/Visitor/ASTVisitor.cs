@@ -7,7 +7,7 @@ namespace clangen
     class ASTVisitor
     {
         static public CXTranslationUnit CurrentTU { get; private set; }
-        private string Namespace = "";
+        //private string Namespace = "";
 
         public AST Visit(CXTranslationUnit TU)
         {
@@ -57,30 +57,29 @@ namespace clangen
                     break;
                 // dealing with function
                 case CXCursorKind.CXCursor_FunctionDecl:
-                    visitor = new FunctionVisitor(ast, Namespace);
+                    visitor = new FunctionVisitor(ast);
                     break;
                 case CXCursorKind.CXCursor_Namespace:
                     // ignore anonymous namespace
                     if (clang.Cursor_isAnonymous(cursor) != 0)
                         return CXChildVisitResult.CXChildVisit_Continue;
-                    else
-                    {
-                        string NS = clang.getCursorSpelling(parent).ToString();
-
-                        if(Namespace.Length == 0)
-                            Namespace += NS;
-                        else
-                            Namespace = Namespace + "::" + NS;
-                    }
+                    //else
+                    //{
+                    //    string NS = clang.getCursorSpelling(parent).ToString();
+                    //
+                    //    if(Namespace.Length == 0)
+                    //        Namespace += NS;
+                    //    else
+                    //        Namespace = Namespace + "::" + NS;
+                    //}
                     return CXChildVisitResult.CXChildVisit_Recurse;
                 case CXCursorKind.CXCursor_TypeAliasDecl:
                 case CXCursorKind.CXCursor_TypedefDecl:
                     TypeVisitHelper.GetNativeType(ast, clang.getCursorType(cursor));
                     break;
                 case CXCursorKind.CXCursor_ClassTemplate:
-                    visitor = new ClassTemplateVisitor(ast);
-                    break;
                 case CXCursorKind.CXCursor_ClassTemplatePartialSpecialization:
+                    visitor = new ClassTemplateVisitor(ast);
                     break;
                 case CXCursorKind.CXCursor_FunctionTemplate:
                     break;

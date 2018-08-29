@@ -7,18 +7,17 @@ namespace clangen
     class FunctionVisitor : IASTVisitor
     {
         private AST AST_;
-        private string namespace_;
+        //private string namespace_;
 
-        public FunctionVisitor(AST ast, string NS)
+        public FunctionVisitor(AST ast)
         {
             AST_ = ast;
-            namespace_ = NS;
         }
 
         public bool DoVisit(CXCursor cursor, CXCursor parent)
         {
             string cursorName = clang.getCursorSpelling(cursor).ToString();
-            string functionName = namespace_ + cursorName;
+            string functionName = cursorName;
             string functionTypeName = clang.getCursorDisplayName(cursor).ToString();
 
             NativeFunction function = AST_.GetFunction(functionName, functionTypeName);

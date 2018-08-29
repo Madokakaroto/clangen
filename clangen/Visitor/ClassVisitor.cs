@@ -81,7 +81,12 @@ namespace clangen
                 case CXCursorKind.CXCursor_TypedefDecl:
                 case CXCursorKind.CXCursor_TypeAliasDecl:
                     ProcessTypeExport(thisClass, cursor, parent);
-                    break; 
+                    break;
+                case CXCursorKind.CXCursor_ClassTemplate:
+                case CXCursorKind.CXCursor_ClassTemplatePartialSpecialization:
+                    break;
+                case CXCursorKind.CXCursor_FunctionTemplate:
+                    break;
                 default:
                     break;
             }

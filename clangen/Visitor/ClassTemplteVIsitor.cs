@@ -16,6 +16,12 @@ namespace clangen
 
         public bool DoVisit(CXCursor cursor, CXCursor parent)
         {
+            string name = clang.getCursorSpelling(cursor).ToString();
+            string displayName = clang.getCursorDisplayName(cursor).ToString();
+
+            CXType type = clang.getCursorType(cursor);
+            string typeName = clang.getTypeSpelling(type).ToString();
+
             clang.visitChildren(cursor, Visitor, new CXClientData(IntPtr.Zero));
             return true;
         }

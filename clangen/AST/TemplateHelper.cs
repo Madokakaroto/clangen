@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace clangen
 {
@@ -23,12 +24,48 @@ namespace clangen
                 ParametersDict.Add(entry.Key, entry.Value);
             }
         }
+
+        public string Signature { get { return GetSignature(false); } }
+        public string NamedSignature { get { return GetSignature(true); } }
+
+        public string GetSignature(bool withParamName, bool isTemplateParam = false)
+        {
+            List<string> tmp = new List<string>();
+            foreach (TemplateParameter param in ParametersList)
+            {
+                tmp.Add(param.GetSignature(withParamName));
+            }
+            string tmpString = string.Join(", ", tmp);
+            if(!isTemplateParam)
+                return string.Format("template <{0}>", tmpString);
+
+            return string.Format("template <{0}> class ");
+        }
     }
 
     public class TemplateParameter
     {
-        public string Name;
-        public bool IsTemplate;
-        public TemplateProto Template;
+        public string Name { get; }
+        public bool IsTemplate { get; private set;  } = false;
+        public TemplateProto Template { get; private set; } = null;
+
+        public string Signature { get { return GetSignature(false); } }
+        public string NamedSignature { get { return GetSignature(true); } }
+
+        TemplateParameter(string name)
+        {
+            Name = name;
+        }
+
+        public string GetSignature(bool withParamName)
+        {
+            string result;
+            if (!IsTemplate)
+                result = "typename ";
+            else
+                result = Template.GetSignature(withParamName, true);
+            if (withParamName) result += Name;
+            return result;
+        }
     }
 }

@@ -40,4 +40,11 @@
         public AccessSpecifier Access;
         public NativeType Type;
     }
+
+    public class FunctionParameter
+    {
+        public string Name { get; set; }
+        public NativeType Type { get; set; }
+        public string DefaultValue { get; set; }
+    }
 }

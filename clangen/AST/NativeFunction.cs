@@ -3,13 +3,6 @@ using System.Linq;
 
 namespace clangen
 {
-    public class FunctionParameter
-    {
-        public string Name { get; set; }
-        public NativeType Type { get; set; }
-        public string DefaultValue { get; set; }
-    }
-
     public class NativeFunction
     {
         public string Name { get; }
