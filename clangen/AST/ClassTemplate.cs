@@ -6,16 +6,15 @@ namespace clangen
 {
     public class ClassTemplate
     {
-        public TemplateProto TP { get; }
+        public TemplateProto TP { get; set; }
         public string ID { get; }
         public string Name { get; set; }
         public string Spelling { get; set; }
         public bool Parsed { get; set; }
 
-        public ClassTemplate(string id, TemplateProto proto)
+        public ClassTemplate(string id)
         {
             ID = id;
-            TP = proto;
         }
     }
 }

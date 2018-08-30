@@ -130,7 +130,7 @@ namespace clangen
 
             // proces result type
             CXType resultType = clang.getCursorResultType(cursor);
-            memberFunc.ResultType = TypeVisitor.GetNativeType(AST_, resultType);
+            memberFunc.ResultType = TypeVisitor.GetNativeType(AST_, resultType, false);
 
             // deep visit children
             GCHandle astHandle = GCHandle.Alloc(memberFunc);
@@ -153,7 +153,7 @@ namespace clangen
                 FunctionParameter param = new FunctionParameter
                 {
                     Name = clang.getCursorSpelling(cursor).ToString(),
-                    Type = TypeVisitor.GetNativeType(AST_, type)
+                    Type = TypeVisitor.GetNativeType(AST_, type, false)
                 };
 
                 clang.visitChildren(cursor, (CXCursor c, CXCursor p, IntPtr d) => 
@@ -210,7 +210,7 @@ namespace clangen
                 for (int loop = 0; loop < templateNum; ++loop)
                 {
                     CXType argType = clang.Type_getTemplateArgumentAsType(type, (uint)loop);
-                    NativeType nativeType = TypeVisitor.GetNativeType(AST_, argType);
+                    NativeType nativeType = TypeVisitor.GetNativeType(AST_, argType, false);
                     thisClass.SetTemplateParameter((uint)loop, nativeType);
                 }
             }
@@ -239,7 +239,7 @@ namespace clangen
 
             // get field type
             CXType type = clang.getCursorType(cursor);
-            NativeType nativeType = TypeVisitor.GetNativeType(AST_, type);
+            NativeType nativeType = TypeVisitor.GetNativeType(AST_, type, true);
 
             // get field access specifier
             AccessSpecifier access = ClangTraits.ToAccessSpecifier(clang.getCXXAccessSpecifier(cursor));
@@ -259,7 +259,7 @@ namespace clangen
         {
             // get field type
             CXType type = clang.getCursorType(cursor);
-            NativeType nativeType = TypeVisitor.GetNativeType(AST_, type);
+            NativeType nativeType = TypeVisitor.GetNativeType(AST_, type, false);
 
             // get field access specifier
             AccessSpecifier access = ClangTraits.ToAccessSpecifier(clang.getCXXAccessSpecifier(cursor));

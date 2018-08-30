@@ -95,6 +95,11 @@ namespace clangen
             return type.kind == CXTypeKind.CXType_Unexposed;
         }
 
+        public static bool IsElaboratedType(CXType type)
+        {
+            return type.kind == CXTypeKind.CXType_Elaborated;
+        }
+
         public static bool IsTypeEntity(CXType type)
         {
             return IsBuiltInType(type) || 

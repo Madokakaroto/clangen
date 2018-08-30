@@ -14,8 +14,9 @@ namespace clangen
         public bool IsAbstract { get; set; } = false;
         public bool IsVirtualBase { get; set; } = false;
 
-        // for full specialization
+        // for template instantiation
         public bool IsTemplateInstance { get; private set; } = false;
+        public ClassTemplate InstanceOf { get; private set; } = null;
         public NativeType[] TemplateParameters { get; private set; } = null;
 
         // for embedded class

@@ -87,7 +87,7 @@ namespace clangen
             }
         }
 
-        public ClassTemplate GetClassTemplate(string name, TemplateProto proto)
+        public ClassTemplate GetClassTemplate(string name)
         {
             if(templates_.ContainsKey(name))
             {
@@ -95,7 +95,7 @@ namespace clangen
             }
             else
             {
-                ClassTemplate template = new ClassTemplate(name, proto);
+                ClassTemplate template = new ClassTemplate(name);
                 templates_.Add(name, template);
                 return template;
             }

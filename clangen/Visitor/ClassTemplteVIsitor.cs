@@ -17,12 +17,14 @@ namespace clangen
 
         public bool DoVisit(CXCursor cursor, CXCursor parent)
         {
-            //string name = visitor_.GetCurrentScopeName(clang.getCursorDisplayName(cursor).ToString());
             string id = clang.getCursorUSR(cursor).ToString();
-            TemplateProto tp = GetTemplateProto(cursor);
-            ClassTemplate template = AST_.GetClassTemplate(id, tp);
-            if(!template.Parsed)
+            ClassTemplate template = AST_.GetClassTemplate(id);
+            bool isDefinition = clang.isCursorDefinition(cursor) != 0;
+            if (!template.Parsed && isDefinition)
             {
+                // proto
+                template.TP = GetTemplateProto(cursor);
+
                 // name
                 template.Name = visitor_.GetCurrentScopeName(
                     clang.getCursorDisplayName(cursor).ToString()
@@ -100,7 +102,7 @@ namespace clangen
             bool isVariadic = ClangTraits.IsVariadicTemplateParameter(cursor);
             TemplateParameter param = new TemplateParameter(paramName, isVariadic);
             CXType type = clang.getCursorType(cursor);
-            NativeType nativeType = TypeVisitor.GetNativeType(AST_, type);
+            NativeType nativeType = TypeVisitor.GetNativeType(AST_, type, false);
             param.Set(nativeType);
             return param;
         }

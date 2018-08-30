@@ -5,12 +5,12 @@ namespace clangen
 {
     public class TypeVisitor
     {
-        public static NativeType GetNativeType(AST ast, CXType type)
+        public static NativeType GetNativeType(AST ast, CXType type, bool isDefinition)
         {
             string typeName = clang.getTypeSpelling(type).ToString();
             NativeType nativeType = ast.GetType(typeName);
 
-            if(!nativeType.Parsed)
+            if(!nativeType.Parsed && isDefinition)
             {
                 // not a type reference nor a type with qualifiers
                 if (ClangTraits.IsTypeEntity(type))
@@ -40,8 +40,7 @@ namespace clangen
                 CXType theType = clang.getCursorType(cursor);
                 string removeQualifierName = clang.getTypeSpelling(theType).ToString();
 
-                // TODO ... dealing with template instantiation
-                //if(ClangTraits.IsUnexposedType(tmp))
+                //if(ClangTraits.IsUnexposedType(cxType))
                 //{
                 //    CXCursor ccc = clang.getSpecializedCursorTemplate(cursor);
                 //}
@@ -50,9 +49,13 @@ namespace clangen
                 {
                     type.Info.SetEnum(ast.GetEnum(removeQualifierName));
                 }
-                else
+                else if(ClangTraits.IsUserDefiendType(cxType))
                 {
                     type.Info.SetClass(ast.GetClass(removeQualifierName));
+                }
+                else if(ClangTraits.IsUnexposedType(cxType))
+                {
+                    CXCursor ccc = clang.getSpecializedCursorTemplate(cursor);
                 }
             }
         }
@@ -62,15 +65,28 @@ namespace clangen
             // get type redirection
             CXCursor typedefedCursor = clang.getTypeDeclaration(cxType);
             CXType typedefedType = clang.getTypedefDeclUnderlyingType(typedefedCursor);
-            // TODO ... dealing with tempalte instantiation
+            
+            // dealing with elaborated type
+            if(ClangTraits.IsElaboratedType(typedefedType) || ClangTraits.IsUnexposedType(typedefedType))
+            {
+                typedefedType = clang.getCursorType(clang.getTypeDeclaration(typedefedType));
+            }
+
+            // typedef and using dose not trigger template instantiation
+            NativeType typedefedNativeType = GetNativeType(ast, typedefedType, false);
+
+            // dealing with tempalte instantiation
             //if (ClangTraits.IsUnexposedType(typedefedType))
             //{
             //    CXCursor instanceCursor = clang.getTypeDeclaration(typedefedType);
             //    CXCursor templateCursor = clang.getSpecializedCursorTemplate(instanceCursor);
             //
+            //    string templateID = clang.getCursorUSR(templateCursor).ToString();
+            //    ClassTemplate template = ast.GetClassTemplate(templateID);
+            //
+            //    // TODO ...set template information
             //}
-            NativeType typedefedNativeType = GetNativeType(ast, typedefedType);
-            
+
             type.SetReferencedType(typedefedNativeType);
         }
 
@@ -93,7 +109,9 @@ namespace clangen
             Debug.Assert(type.Qualifier != QulifierType.Unknown);
 
             CXType pointeeType = clang.getPointeeType(cxType);
-            NativeType nativeType = GetNativeType(ast, pointeeType);
+            // pointer and reference type requires only forward declaration and 
+            // does not trigger template instantiation
+            NativeType nativeType = GetNativeType(ast, pointeeType, false);
             type.SetReferencedType(nativeType);
         }
     }
