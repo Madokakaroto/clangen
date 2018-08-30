@@ -190,7 +190,12 @@ namespace clangen
         public static bool IsVariadicTemplateParameter(CXCursor cursor)
         {
             List<string> tokens = ASTVisitor.GetCursorTokens(cursor);
-            return tokens.Contains("...");
+            int count = tokens.Count;
+            if (count < 2)
+                return false;
+            if (tokens[count - 1] == "...")
+                return true;
+            return tokens[count - 2] == "...";
         }
     }
 }

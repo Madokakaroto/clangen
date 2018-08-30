@@ -17,13 +17,23 @@ namespace clangen
 
         public bool DoVisit(CXCursor cursor, CXCursor parent)
         {
-            string name = visitor_.GetCurrentScopeName(clang.getCursorDisplayName(cursor).ToString());
+            //string name = visitor_.GetCurrentScopeName(clang.getCursorDisplayName(cursor).ToString());
+            string id = clang.getCursorUSR(cursor).ToString();
             TemplateProto tp = GetTemplateProto(cursor);
-            ClassTemplate template = AST_.GetClassTemplate(name, tp);
+            ClassTemplate template = AST_.GetClassTemplate(id, tp);
             if(!template.Parsed)
             {
+                // name
+                template.Name = visitor_.GetCurrentScopeName(
+                    clang.getCursorDisplayName(cursor).ToString()
+                    );
+
+                // spelling
                 template.Spelling = visitor_.GetCurrentScopeName(
-                    clang.getCursorSpelling(cursor).ToString());
+                    clang.getCursorSpelling(cursor).ToString()
+                    );
+
+                // do parse for template definition
                 if(clang.isCursorDefinition(cursor) != 0)
                 {
                     GCHandle classTemplateHandle = GCHandle.Alloc(template);
@@ -36,6 +46,21 @@ namespace clangen
 
         private CXChildVisitResult Visitor(CXCursor cursor, CXCursor parent, IntPtr data)
         {
+            switch (cursor.kind)
+            {
+                case CXCursorKind.CXCursor_TypedefDecl:
+                case CXCursorKind.CXCursor_TypeAliasDecl:
+                    break;
+                case CXCursorKind.CXCursor_FieldDecl:
+                    CXType type = clang.getCursorType(cursor);
+                    CXType type1 = clang.getPointeeType(type);
+
+                    CXCursor c = clang.getTypeDeclaration(type);
+                    CXCursor templateCursor = clang.getSpecializedCursorTemplate(cursor);
+                    break;
+                case CXCursorKind.CXCursor_CXXMethod:
+                    break;
+            }
             return CXChildVisitResult.CXChildVisit_Continue;
         }
 

@@ -97,4 +97,9 @@ namespace clangen
             type.SetReferencedType(nativeType);
         }
     }
+
+    public class DependentTypeVisitor
+    {
+        //public static void 
+    }
 }

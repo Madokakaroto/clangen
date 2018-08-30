@@ -127,7 +127,7 @@ namespace clangen
             List<string> result = new List<string>();
             clang.tokenize(CurrentTU, range, out tokens, out numToken);
             IntPtr tmp = tokens;
-            for (uint loop = 0; loop < numToken; ++loop, tmp = IntPtr.Add(tokens, (int)loop))
+            for (uint loop = 0; loop < numToken; ++loop, tmp = IntPtr.Add(tmp, Marshal.SizeOf<CXToken>()))
             {
                 CXToken token = Marshal.PtrToStructure<CXToken>(tmp);
                 result.Add(clang.getTokenSpelling(CurrentTU, token).ToString());

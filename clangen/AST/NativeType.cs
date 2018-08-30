@@ -123,4 +123,9 @@ namespace clangen
             return TypeName;
         }
     }
+
+    public class DependentType
+    {
+
+    }
 }

@@ -89,7 +89,6 @@ namespace clangen
 
         public ClassTemplate GetClassTemplate(string name, TemplateProto proto)
         {
-            string templateName = string.Format("{0} {1}", proto.Signature, name);
             if(templates_.ContainsKey(name))
             {
                 return templates_[name];
