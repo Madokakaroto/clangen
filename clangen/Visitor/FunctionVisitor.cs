@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using ClangSharp;
 
@@ -58,21 +59,10 @@ namespace clangen
                     if(ClangTraits.IsLiteralCursor(c))
                     {
                         // get liter-string from token
-                        CXSourceRange range = clang.getCursorExtent(c);
-                        IntPtr tokens;
-                        uint numToken;
-                        string liter = "";
-                        clang.tokenize(ASTVisitor.CurrentTU, range, out tokens, out numToken);
-                        IntPtr tmp = tokens;
-                        for (uint loop = 0; loop < numToken; ++loop, IntPtr.Add(tmp, 1))
-                        {
-                            CXToken token = Marshal.PtrToStructure<CXToken>(tmp);
-                            liter += clang.getTokenSpelling(ASTVisitor.CurrentTU, token).ToString();
-                        }
-                        clang.disposeTokens(ASTVisitor.CurrentTU, tokens, numToken);
+                        List<string> tokens = ASTVisitor.GetCursorTokens(c);
 
                         // set default literal
-                        param.DefaultValue = liter;
+                        param.DefaultValue = string.Concat(tokens);
                     }
                     return CXChildVisitResult.CXChildVisit_Continue;
                 }, new CXClientData(IntPtr.Zero));

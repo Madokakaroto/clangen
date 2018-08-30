@@ -106,5 +106,34 @@ namespace clangen
             int size = namespaces_.Count - 1;
             namespaces_.RemoveAt(size);
         }
+
+        public string GetCurrentScopeName(string spelling)
+        {
+            List<string> NameGenList = new List<string>();
+            foreach(string ns in namespaces_)
+            {
+                NameGenList.Add(ns);
+            }
+            NameGenList.Add(spelling);
+            return string.Join("::", NameGenList);
+        }
+
+        public static List<string> GetCursorTokens(CXCursor cursor)
+        {
+            // get liter-string from token
+            CXSourceRange range = clang.getCursorExtent(cursor);
+            IntPtr tokens = IntPtr.Zero;
+            uint numToken;
+            List<string> result = new List<string>();
+            clang.tokenize(CurrentTU, range, out tokens, out numToken);
+            IntPtr tmp = tokens;
+            for (uint loop = 0; loop < numToken; ++loop, tmp = IntPtr.Add(tokens, (int)loop))
+            {
+                CXToken token = Marshal.PtrToStructure<CXToken>(tmp);
+                result.Add(clang.getTokenSpelling(CurrentTU, token).ToString());
+            }
+            clang.disposeTokens(CurrentTU, tokens, numToken);
+            return result;
+        }
     }
 }

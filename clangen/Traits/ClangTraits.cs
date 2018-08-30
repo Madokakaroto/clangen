@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
 using ClangSharp;
 
 namespace clangen
@@ -184,6 +185,12 @@ namespace clangen
             Debug.Assert(IsUserDefinedTypeDecl(kind));
             return kind == CXCursorKind.CXCursor_ClassDecl ?
                 StructOrClass.Class : StructOrClass.Struct;
+        }
+
+        public static bool IsVariadicTemplateParameter(CXCursor cursor)
+        {
+            List<string> tokens = ASTVisitor.GetCursorTokens(cursor);
+            return tokens.Contains("...");
         }
     }
 }

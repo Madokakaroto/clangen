@@ -4,16 +4,17 @@ using System.Text;
 
 namespace clangen
 {
-    class ClassTemplate
+    public class ClassTemplate
     {
-        public TemplateProto Template { get; }
+        public TemplateProto TP { get; }
         public string Name { get; }
+        public string Spelling { get; set; }
+        public bool Parsed { get; set; }
 
-        ClassTemplate(string name)
+        public ClassTemplate(string name, TemplateProto proto)
         {
             Name = name;
+            TP = proto;
         }
-
-
     }
 }

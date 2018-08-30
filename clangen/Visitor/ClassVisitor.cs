@@ -162,7 +162,7 @@ namespace clangen
                     {
                         // get liter-string from token
                         CXSourceRange range = clang.getCursorExtent(c);
-                        IntPtr tokens;
+                        IntPtr tokens = IntPtr.Zero;
                         uint numToken;
                         string liter = "";
                         clang.tokenize(ASTVisitor.CurrentTU, range, out tokens, out numToken);

@@ -8,6 +8,7 @@ namespace clangen
         private Dictionary<string, NativeType> types_ = new Dictionary<string, NativeType>();
         private Dictionary<string, Enumeration> enums_ = new Dictionary<string, Enumeration>();
         private Dictionary<string, List<NativeFunction>> functions_ = new Dictionary<string, List<NativeFunction>>();
+        private Dictionary<string, ClassTemplate> templates_ = new Dictionary<string, ClassTemplate>();
 
         /* user defined type - class or struct */
         public NativeClass GetClass(string className)
@@ -83,6 +84,21 @@ namespace clangen
                 NativeFunction newFunc = new NativeFunction(name, type);
                 functions.Add(newFunc);
                 return newFunc;
+            }
+        }
+
+        public ClassTemplate GetClassTemplate(string name, TemplateProto proto)
+        {
+            string templateName = string.Format("{0} {1}", proto.Signature, name);
+            if(templates_.ContainsKey(name))
+            {
+                return templates_[name];
+            }
+            else
+            {
+                ClassTemplate template = new ClassTemplate(name, proto);
+                templates_.Add(name, template);
+                return template;
             }
         }
     }
