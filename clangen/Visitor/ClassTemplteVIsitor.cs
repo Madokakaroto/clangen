@@ -54,11 +54,11 @@ namespace clangen
                 case CXCursorKind.CXCursor_TypeAliasDecl:
                     break;
                 case CXCursorKind.CXCursor_FieldDecl:
-                    CXType type = clang.getCursorType(cursor);
-                    CXType type1 = clang.getPointeeType(type);
-
-                    CXCursor c = clang.getTypeDeclaration(type);
-                    CXCursor templateCursor = clang.getSpecializedCursorTemplate(cursor);
+                    //CXType type = clang.getCursorType(cursor);
+                    //CXType type1 = clang.getPointeeType(type);
+                    //
+                    //CXCursor c = clang.getTypeDeclaration(type);
+                    //CXCursor templateCursor = clang.getSpecializedCursorTemplate(cursor);
                     break;
                 case CXCursorKind.CXCursor_CXXMethod:
                     break;

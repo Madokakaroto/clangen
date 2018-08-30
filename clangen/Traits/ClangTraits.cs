@@ -105,7 +105,8 @@ namespace clangen
             return IsBuiltInType(type) || 
                    IsEnum(type) || 
                    IsUserDefiendType(type) ||
-                   IsUnexposedType(type);
+                   IsUnexposedType(type) ||
+                   IsElaboratedType(type);
         }
 
         public static bool IsTypedef(CXType type)
