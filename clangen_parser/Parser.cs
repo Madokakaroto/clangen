@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Runtime.InteropServices;
 using ClangSharp;
 
 namespace clangen
@@ -36,6 +37,11 @@ namespace clangen
 
     public class Parser
     {
+        public Parser(string libPath)
+        {
+            SetDllDirectory(libPath);
+        }
+
         public AST ParseWithClangArgs(string[] args)
         {
             if (args.Length < 1 || !File.Exists(args[0]))
@@ -78,5 +84,8 @@ namespace clangen
             FileInfo fileInfo = new FileInfo(FileName);
             return fileInfo.Length;
         }
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        static extern bool SetDllDirectory(string lpPathName);
     }
 }

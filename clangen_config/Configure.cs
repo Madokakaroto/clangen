@@ -8,5 +8,6 @@ namespace clangen
 {
     public class Configure
     {
+
     }
 }

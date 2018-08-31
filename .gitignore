@@ -6,4 +6,6 @@ clangen_config/bin
 clangen_config/obj
 clangen_parser/bin
 clangen_parser/obj
+bin/Debug
+bin/Release
 .vs
