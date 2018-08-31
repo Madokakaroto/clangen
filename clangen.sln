@@ -5,8 +5,6 @@ VisualStudioVersion = 15.0.28010.2003
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "clangen", "clangen\clangen.csproj", "{6FB359B6-F707-4F99-B2B9-38269D478DCE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotLiquid", "DotLiquid\DotLiquid.csproj", "{60053F41-277A-45A3-B9BD-D25D97DAB467}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -17,10 +15,6 @@ Global
 		{6FB359B6-F707-4F99-B2B9-38269D478DCE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6FB359B6-F707-4F99-B2B9-38269D478DCE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6FB359B6-F707-4F99-B2B9-38269D478DCE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{60053F41-277A-45A3-B9BD-D25D97DAB467}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{60053F41-277A-45A3-B9BD-D25D97DAB467}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{60053F41-277A-45A3-B9BD-D25D97DAB467}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{60053F41-277A-45A3-B9BD-D25D97DAB467}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
