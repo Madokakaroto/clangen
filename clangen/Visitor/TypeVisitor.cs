@@ -6,7 +6,7 @@ namespace clangen
 {
     public class TypeVisitor
     {
-        public static NativeType GetNativeType(AST ast, CXType cxType, bool isDefinition)
+        public static NativeType GetNativeType(AST ast, CXType cxType)
         {
             CXType type = cxType;
             if(ClangTraits.IsElaboratedType(type) || ClangTraits.IsUnexposedType(type))
@@ -17,19 +17,19 @@ namespace clangen
             string typeName = clang.getTypeSpelling(type).ToString();
             NativeType nativeType = ast.GetType(typeName);
 
-            if(!nativeType.Parsed && isDefinition)
+            if(!nativeType.Parsed)
             {
                 // not a type reference nor a type with qualifiers
                 if (ClangTraits.IsTypeEntity(type))
                     ProcessTypeEntity(ast, nativeType, type, ClangTraits.IsUnexposedType(cxType));
                 // using or typedef
                 else if (ClangTraits.IsTypedef(type))
-                    ProcessTypedef(ast, nativeType, type, isDefinition);
+                    ProcessTypedef(ast, nativeType, type);
                 else if (ClangTraits.IsArray(type))
-                    ProcessArray(ast, nativeType, type, isDefinition);
+                    ProcessArray(ast, nativeType, type);
                 // reference and pointer 
                 else
-                    ProcessQualifiers(ast, nativeType, type, isDefinition);
+                    ProcessQualifiers(ast, nativeType, type);
                 nativeType.Parsed = true;
             }
 
@@ -76,16 +76,16 @@ namespace clangen
             }
         }
 
-        private static void ProcessTypedef(AST ast, NativeType type, CXType cxType, bool isDefinition)
+        private static void ProcessTypedef(AST ast, NativeType type, CXType cxType)
         {
             // get type redirection
             CXCursor typedefedCursor = clang.getTypeDeclaration(cxType);
             CXType typedefedType = clang.getTypedefDeclUnderlyingType(typedefedCursor);
-            NativeType typedefedNativeType = GetNativeType(ast, typedefedType, isDefinition);
+            NativeType typedefedNativeType = GetNativeType(ast, typedefedType);
             type.SetReferencedType(typedefedNativeType);
         }
 
-        private static void ProcessArray(AST ast, NativeType type, CXType cxType, bool isDefinition)
+        private static void ProcessArray(AST ast, NativeType type, CXType cxType)
         {
             // set as array
             type.IsArray = true;
@@ -96,11 +96,11 @@ namespace clangen
 
             // get element type
             CXType elementType = clang.getArrayElementType(cxType);
-            NativeType nativeType = GetNativeType(ast, elementType, isDefinition);
+            NativeType nativeType = GetNativeType(ast, elementType);
             type.SetReferencedType(nativeType);
         }
 
-        private static void ProcessQualifiers(AST ast, NativeType type, CXType cxType, bool isDefinition)
+        private static void ProcessQualifiers(AST ast, NativeType type, CXType cxType)
         {
             Debug.Assert(type.Qualifier == QulifierType.Unknown);
             type.IsConst = ClangTraits.IsConst(cxType);
@@ -121,7 +121,7 @@ namespace clangen
             CXType pointeeType = clang.getPointeeType(cxType);
             // pointer and reference type requires only forward declaration and 
             // does not trigger template instantiation
-            NativeType nativeType = GetNativeType(ast, pointeeType, isDefinition);
+            NativeType nativeType = GetNativeType(ast, pointeeType);
             type.SetReferencedType(nativeType);
         }
     }

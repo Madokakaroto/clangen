@@ -25,9 +25,10 @@ namespace clangen
         public AccessSpecifier Access { get; set; } = AccessSpecifier.Private;
 
         // private data
-        public List<BaseClass> BaseClasses { get; private set; } = new List<BaseClass>();
-        public List<SubClass> SubClasses { get; private set; } = new List<SubClass>();
-        public List<MemberType> MemberTypes { get; private set; } = new List<MemberType>();
+        public List<BaseClass> BaseClasses { get; } = new List<BaseClass>();
+        public List<SubClass> SubClasses { get; } = new List<SubClass>();
+        public List<MemberType> MemberTypes { get; } = new List<MemberType>();
+        public List<Constructor> Constructors { get; } = new List<Constructor>();
 
         private Dictionary<string, List<Method>> methods_
             = new Dictionary<string, List<Method>>();
@@ -78,6 +79,11 @@ namespace clangen
             {
                 fields_.Add(name, field);
             }
+        }
+
+        public void AddConstructor(Constructor ctor)
+        {
+            Constructors.Add(ctor);
         }
 
         public void SetTemplateParameterCount(uint count)

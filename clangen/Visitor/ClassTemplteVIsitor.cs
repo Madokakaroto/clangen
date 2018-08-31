@@ -102,7 +102,7 @@ namespace clangen
             bool isVariadic = ClangTraits.IsVariadicTemplateParameter(cursor);
             TemplateParameter param = new TemplateParameter(paramName, isVariadic);
             CXType type = clang.getCursorType(cursor);
-            NativeType nativeType = TypeVisitor.GetNativeType(AST_, type, false);
+            NativeType nativeType = TypeVisitor.GetNativeType(AST_, type);
             param.Set(nativeType);
             return param;
         }

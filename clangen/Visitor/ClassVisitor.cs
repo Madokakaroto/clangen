@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Collections.Generic;
 using ClangSharp;
 
 namespace clangen
 {
+    delegate void OnVisitFunctionParameter(FunctionParameter param);
+
     class ClassVisitor : IASTVisitor
     {
         private AST AST_;
@@ -87,6 +90,9 @@ namespace clangen
                     break;
                 case CXCursorKind.CXCursor_FunctionTemplate:
                     break;
+                case CXCursorKind.CXCursor_Constructor:
+                    ProcessConstructor(thisClass, cursor, parent);
+                    break;
                 default:
                     break;
             }
@@ -116,6 +122,41 @@ namespace clangen
             thisClass.AddBaseClass(baseClass);
         }
 
+        private void ProcessConstructor(NativeClass thisClass, CXCursor cursor, CXCursor parent)
+        {
+            bool isDefault = clang.CXXConstructor_isDefaultConstructor(cursor) != 0;
+            bool isConvert = clang.CXXConstructor_isConvertingConstructor(cursor) != 0;
+            bool isCopy = clang.CXXConstructor_isCopyConstructor(cursor) != 0;
+            bool isMove = clang.CXXConstructor_isMoveConstructor(cursor) != 0;
+
+            Constructor ctor = new Constructor(isDefault, isConvert, isCopy, isMove);
+            OnVisitFunctionParameter func = (FunctionParameter param) =>
+            {
+                ctor.AddParameter(param);
+            };
+
+            List<string> tokens = ASTVisitor.GetCursorTokens(cursor);
+            if (tokens[0] == "explicit")
+            {
+                ctor.IsExplicit = true;
+            }
+
+            int count = tokens.Count;
+            if (tokens[count - 2] == "=")
+            {
+                string lastToken = tokens[count - 1];
+                if (lastToken == "default")
+                    ctor.Composite = DefaultCompositeKind.Default;
+                else if (lastToken == "delete")
+                    ctor.Composite = DefaultCompositeKind.Delete;
+            }
+
+            // deep visit
+            GCHandle delegateHandle = GCHandle.Alloc(func);
+            clang.visitChildren(cursor, ParameterVisitor, new CXClientData((IntPtr)delegateHandle));
+            thisClass.AddConstructor(ctor);
+        }
+
         private void ProcessMethod(NativeClass thisClass, CXCursor cursor, CXCursor parent)
         {
             string name = clang.getCursorSpelling(cursor).ToString();
@@ -127,33 +168,37 @@ namespace clangen
             // create method
             Method memberFunc = new Method( thisClass,
                 name, isStataic, isConst, isVirtual, isAbastrct);
+            OnVisitFunctionParameter func = (FunctionParameter param) =>
+            {
+                memberFunc.AddParameter(param);
+            };
 
             // proces result type
             CXType resultType = clang.getCursorResultType(cursor);
-            memberFunc.ResultType = TypeVisitor.GetNativeType(AST_, resultType, false);
+            memberFunc.ResultType = TypeVisitor.GetNativeType(AST_, resultType);
 
             // deep visit children
-            GCHandle astHandle = GCHandle.Alloc(memberFunc);
-            clang.visitChildren(cursor, MethodChildVisitor, new CXClientData((IntPtr)astHandle));
+            GCHandle delegateHandler = GCHandle.Alloc(func);
+            clang.visitChildren(cursor, ParameterVisitor, new CXClientData((IntPtr)delegateHandler));
 
             // register method
             thisClass.AddMethod(memberFunc);
         }
 
-        private CXChildVisitResult MethodChildVisitor(CXCursor cursor, CXCursor parent, IntPtr data)
+        private CXChildVisitResult ParameterVisitor(CXCursor cursor, CXCursor parent, IntPtr data)
         {
             if(CXCursorKind.CXCursor_ParmDecl == cursor.kind)
             {
                 // prepare client data
                 GCHandle astHandle = (GCHandle)data;
-                Method thisMethod = astHandle.Target as Method;
+                OnVisitFunctionParameter func = astHandle.Target as OnVisitFunctionParameter;
 
                 CXType type = clang.getCursorType(cursor);
 
                 FunctionParameter param = new FunctionParameter
                 {
                     Name = clang.getCursorSpelling(cursor).ToString(),
-                    Type = TypeVisitor.GetNativeType(AST_, type, false)
+                    Type = TypeVisitor.GetNativeType(AST_, type)
                 };
 
                 clang.visitChildren(cursor, (CXCursor c, CXCursor p, IntPtr d) => 
@@ -180,7 +225,7 @@ namespace clangen
                     return CXChildVisitResult.CXChildVisit_Continue;
                 }, new CXClientData(IntPtr.Zero));
 
-                thisMethod.AddParameter(param);
+                func(param);
             }
 
             return CXChildVisitResult.CXChildVisit_Recurse;
@@ -210,7 +255,7 @@ namespace clangen
                 for (int loop = 0; loop < templateNum; ++loop)
                 {
                     CXType argType = clang.Type_getTemplateArgumentAsType(type, (uint)loop);
-                    NativeType nativeType = TypeVisitor.GetNativeType(AST_, argType, false);
+                    NativeType nativeType = TypeVisitor.GetNativeType(AST_, argType);
                     thisClass.SetTemplateParameter((uint)loop, nativeType);
                 }
             }
@@ -239,7 +284,7 @@ namespace clangen
 
             // get field type
             CXType type = clang.getCursorType(cursor);
-            NativeType nativeType = TypeVisitor.GetNativeType(AST_, type, true);
+            NativeType nativeType = TypeVisitor.GetNativeType(AST_, type);
 
             // get field access specifier
             AccessSpecifier access = ClangTraits.ToAccessSpecifier(clang.getCXXAccessSpecifier(cursor));
@@ -259,7 +304,7 @@ namespace clangen
         {
             // get field type
             CXType type = clang.getCursorType(cursor);
-            NativeType nativeType = TypeVisitor.GetNativeType(AST_, type, false);
+            NativeType nativeType = TypeVisitor.GetNativeType(AST_, type);
 
             // get field access specifier
             AccessSpecifier access = ClangTraits.ToAccessSpecifier(clang.getCXXAccessSpecifier(cursor));
