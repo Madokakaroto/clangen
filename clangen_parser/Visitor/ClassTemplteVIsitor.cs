@@ -4,7 +4,7 @@ using ClangSharp;
 
 namespace clangen
 {
-    public class ClassTemplateVisitor : IASTVisitor
+    class ClassTemplateVisitor : IASTVisitor
     {
         AST AST_;
         ASTVisitor visitor_;

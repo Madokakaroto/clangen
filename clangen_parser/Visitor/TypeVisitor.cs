@@ -41,7 +41,7 @@ namespace clangen
             type.IsConst = ClangTraits.IsConst(cxType);
             if (ClangTraits.IsBuiltInType(cxType))
             {
-                type.Info.SetBasicType(ClangTraits.ToBasicType(cxType));
+                type.SetBasicType(ClangTraits.ToBasicType(cxType));
             }
             else
             {
@@ -51,7 +51,7 @@ namespace clangen
 
                 if (ClangTraits.IsEnum(cxType))
                 {
-                    type.Info.SetEnum(ast.GetEnum(removeQualifierName));
+                    type.SetEnum(ast.GetEnum(removeQualifierName));
                 }
                 else if(ClangTraits.IsUserDefiendType(cxType))
                 {
@@ -71,7 +71,7 @@ namespace clangen
                         nativeClass.Parsed = true;
                     }
 
-                    type.Info.SetClass(nativeClass);
+                    type.SetClass(nativeClass);
                 }
             }
         }

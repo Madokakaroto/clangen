@@ -1,6 +1,9 @@
 # Compiled Object files
+packages
 clangen/bin
 clangen/obj
-DotLiquid/bin
-DotLiquid/obj
+clangen_config/bin
+clangen_config/obj
+clangen_parser/bin
+clangen_parser/obj
 .vs

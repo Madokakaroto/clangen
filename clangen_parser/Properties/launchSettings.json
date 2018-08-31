@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "clangen": {
+        "commandName": "Project",
+        "commandLineArgs": "D:/programming/cpp_in_depth/clang_test/test1.cpp -x c++"
+    }
+  }
+}

@@ -4,7 +4,7 @@ using ClangSharp;
 
 namespace clangen
 {
-    public class ClangTraits
+    class ClangTraits
     {
         public static bool IsInvalid(CXType type)
         {

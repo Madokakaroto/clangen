@@ -73,7 +73,7 @@ namespace clangen
         public QulifierType Qualifier { get; set; } = QulifierType.Unknown;
 
         // builtin type, class or enum 
-        public TypeInfo Info { get; } = new TypeInfo();
+        public TypeInfo Info { get; private set; }
 
         // array
         public bool IsArray { get; set; } = false;
@@ -92,6 +92,29 @@ namespace clangen
         {
             Debug.Assert(type != null);
             ReferencedType = type;
+        }
+
+        public void SetBasicType(BasicType type)
+        {
+            Debug.Assert(ASTTraits.IsBuiltInType(type));
+            GetInfo().SetBasicType(type);
+        }
+
+        public void SetClass(NativeClass @class)
+        {
+            GetInfo().SetClass(@class);
+        }
+
+        public void SetEnum(Enumeration @enum)
+        {
+            GetInfo().SetEnum(@enum);
+        }
+
+        private TypeInfo GetInfo()
+        {
+            if (Info == null)
+                Info = new TypeInfo();
+            return Info;
         }
 
         public string GetCollaspedName()
