@@ -25,6 +25,8 @@ namespace clangen
                 // using or typedef
                 else if (ClangTraits.IsTypedef(type))
                     ProcessTypedef(ast, nativeType, type, isDefinition);
+                else if (ClangTraits.IsArray(type))
+                    ProcessArray(ast, nativeType, type, isDefinition);
                 // reference and pointer 
                 else
                     ProcessQualifiers(ast, nativeType, type, isDefinition);
@@ -66,13 +68,6 @@ namespace clangen
                         
                         // TODO ... template instantiation
 
-                        clang.Type_visitFields(theType, (CXCursor c, IntPtr data)=>
-                        {
-                            CXCursorKind kind = c.kind;
-                            return CXVisitorResult.CXVisit_Continue;
-                        }, new CXClientData(IntPtr.Zero));
-
-                        // TODO ...
                         nativeClass.Parsed = true;
                     }
 
@@ -88,6 +83,21 @@ namespace clangen
             CXType typedefedType = clang.getTypedefDeclUnderlyingType(typedefedCursor);
             NativeType typedefedNativeType = GetNativeType(ast, typedefedType, isDefinition);
             type.SetReferencedType(typedefedNativeType);
+        }
+
+        private static void ProcessArray(AST ast, NativeType type, CXType cxType, bool isDefinition)
+        {
+            // set as array
+            type.IsArray = true;
+            if (!ClangTraits.IsIncompleteArray(cxType))
+            {
+                type.Count = (int)clang.getArraySize(cxType);
+            }
+
+            // get element type
+            CXType elementType = clang.getArrayElementType(cxType);
+            NativeType nativeType = GetNativeType(ast, elementType, isDefinition);
+            type.SetReferencedType(nativeType);
         }
 
         private static void ProcessQualifiers(AST ast, NativeType type, CXType cxType, bool isDefinition)

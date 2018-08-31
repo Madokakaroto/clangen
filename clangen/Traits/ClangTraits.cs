@@ -100,6 +100,18 @@ namespace clangen
             return type.kind == CXTypeKind.CXType_Elaborated;
         }
 
+        public static bool IsArray(CXType type)
+        {
+            return type.kind == CXTypeKind.CXType_ConstantArray || 
+                type.kind == CXTypeKind.CXType_IncompleteArray || 
+                type.kind == CXTypeKind.CXType_DependentSizedArray;
+        }
+
+        public static bool IsIncompleteArray(CXType type)
+        {
+            return type.kind == CXTypeKind.CXType_IncompleteArray;
+        }
+
         public static bool IsTypeEntity(CXType type)
         {
             return IsBuiltInType(type) || 

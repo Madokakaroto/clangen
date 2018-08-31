@@ -69,18 +69,23 @@ namespace clangen
         // property
         public string TypeName { get; }
         public bool Parsed { get; set; } = false;
-
-        public TypeInfo Info { get; private set; }
-        public QulifierType Qualifier { get; set; }
-        
         public bool IsConst { get; set; } = false;
+        public QulifierType Qualifier { get; set; } = QulifierType.Unknown;
+
+        // builtin type, class or enum 
+        public TypeInfo Info { get; } = new TypeInfo();
+
+        // array
+        public bool IsArray { get; set; } = false;
+        public int Count { get; set; } = -1;
+
+        // typedef or type alias
         public NativeType ReferencedType { get; private set; } = null;
         public string CollaspedName { get{ return GenerateColloaspedName(); } }
 
         public NativeType(string typeName)
         {
             TypeName = typeName;
-            Info = new TypeInfo();
         }
 
         public void SetReferencedType(NativeType type)
