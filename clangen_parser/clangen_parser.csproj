@@ -17,4 +17,8 @@
     <OutputPath>..\bin\Release</OutputPath>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\clangen_config\clangen_config.csproj" />
+  </ItemGroup>
+
 </Project>

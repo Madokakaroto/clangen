@@ -1,0 +1,5 @@
+sources: 
+    - ../../Test/TestCase/test.cpp
+extras: 
+    - -x 
+    - c++

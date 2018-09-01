@@ -30,9 +30,9 @@ namespace clangen
             string libclang_path = Environment.CurrentDirectory;
             int index = libclang_path.LastIndexOf('\\');
             libclang_path = libclang_path.Substring(0, index);
-
             Parser p = new Parser(libclang_path);
-            //AST ast = p.ParseWithClangArgs(args);
+            CppConfig cppConfig = Configure.GetCppConfig(filePath);
+            AST ast = p.ParseWithClangArgs(cppConfig);
             return;
         }
     }

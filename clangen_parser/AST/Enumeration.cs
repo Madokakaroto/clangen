@@ -9,14 +9,14 @@ namespace clangen
     public class EnumConstant
     {
         [FieldOffset(0)] public BasicType  UnderlyingType;
-        [FieldOffset(1)] public sbyte      Int8_Value;
-        [FieldOffset(1)] public byte       UInt8_Value;
-        [FieldOffset(1)] public short      Int16_Value;
-        [FieldOffset(1)] public ushort     UInt16_Value;
-        [FieldOffset(1)] public int        Int32_Value;
-        [FieldOffset(1)] public uint       UInt32_Value;
-        [FieldOffset(1)] public long       Int64_Value;
-        [FieldOffset(1)] public ulong      UInt64_Value;
+        [FieldOffset(4)] public sbyte      Int8_Value;
+        [FieldOffset(4)] public byte       UInt8_Value;
+        [FieldOffset(4)] public short      Int16_Value;
+        [FieldOffset(4)] public ushort     UInt16_Value;
+        [FieldOffset(4)] public int        Int32_Value;
+        [FieldOffset(4)] public uint       UInt32_Value;
+        [FieldOffset(4)] public long       Int64_Value;
+        [FieldOffset(4)] public ulong      UInt64_Value;
 
         public static EnumConstant Create(BasicType type, long value)
         {

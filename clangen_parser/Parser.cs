@@ -1,39 +1,40 @@
 ﻿using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Collections.Generic;
 using ClangSharp;
 
 namespace clangen
 {
-    static class Extensions
-    {
-        /// <summary>
-        /// Get the array slice between the two indexes.
-        /// ... Inclusive for start index, exclusive for end index.
-        /// </summary>
-        public static T[] Slice<T>(this T[] source, int start, int end)
-        {
-            // Handles negative ends.
-            if (end < 0)
-            {
-                end = source.Length + end;
-            }
-            int len = end - start;
-
-            // Return new array.
-            T[] res = new T[len];
-            for (int i = 0; i < len; i++)
-            {
-                res[i] = source[i + start];
-            }
-            return res;
-        }
-
-        public static T[] Slice<T>(this T[] source, int start)
-        {
-            return Slice(source, start, source.Length);
-        }
-    }
+    //static class Extensions
+    //{
+    //    /// <summary>
+    //    /// Get the array slice between the two indexes.
+    //    /// ... Inclusive for start index, exclusive for end index.
+    //    /// </summary>
+    //    public static List<T> Slice<T>(this List<T> source, int start, int end)
+    //    {
+    //        // Handles negative ends.
+    //        if (end < 0)
+    //        {
+    //            end = source.Count + end;
+    //        }
+    //        int len = end - start;
+    //
+    //        // Return new array.
+    //        List<T> res = new List<T>();
+    //        for (int i = 0; i < len; i++)
+    //        {
+    //            res[i] = source[i + start];
+    //        }
+    //        return res;
+    //    }
+    //
+    //    public static List<T> Slice<T>(this List<T> source, int start)
+    //    {
+    //        return Slice(source, start, source.Count);
+    //    }
+    //}
 
     public class Parser
     {
@@ -42,24 +43,24 @@ namespace clangen
             SetDllDirectory(libPath);
         }
 
-        public AST ParseWithClangArgs(string[] args)
+        public AST ParseWithClangArgs(CppConfig config)
         {
-            if (args.Length < 1 || !File.Exists(args[0]))
+            if(config.Sources.Count == 0)
             {
-                Console.WriteLine("Invalid Arguments");
+                 Console.WriteLine("No input sources or includes");
                 return null;
             }
 
+            // the index object
             CXIndex Index = clang.createIndex(0, 0);
 
-            CXTranslationUnit TU;
-            string[] @params = args.Slice(1);
-
+            // prepare some vars for parse
             uint option = clang.defaultEditingTranslationUnitOptions()
                 | (uint)CXTranslationUnit_Flags.CXTranslationUnit_SkipFunctionBodies;
-
             CXUnsavedFile unsavedFile = new CXUnsavedFile();
-            var error = clang.parseTranslationUnit2(Index, args[0], @params, @params.Length, out unsavedFile, 0,
+            
+            CXTranslationUnit TU;
+            var error = clang.parseTranslationUnit2(Index, config.Sources[0], config.Extras, config.Extras.Length, out unsavedFile, 0,
                 option, out TU);
             if (error != CXErrorCode.CXError_Success)
             {
@@ -76,7 +77,9 @@ namespace clangen
             }
 
             ASTVisitor visitor = new ASTVisitor();
-            return visitor.Visit(TU); ;
+            AST ast = visitor.Visit(TU);
+            clang.disposeIndex(Index);
+            return ast;
         }
 
         private static long GetFileSize(string FileName)
