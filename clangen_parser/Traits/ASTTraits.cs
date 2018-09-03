@@ -4,7 +4,8 @@ using System.Text;
 
 namespace clangen
 {
-    public class ASTTraits
+    // basic traits
+    public partial class ASTTraits
     {
         public static bool IsIntegral(BasicType type)
         {
@@ -30,15 +31,29 @@ namespace clangen
                 type != BasicType.Enum &&
                 type != BasicType.Unknown;
         }
+    }
 
+    // for enumeration
+    public partial class ASTTraits
+    {
         public static bool IsEnum(BasicType type)
         {
             return type == BasicType.Enum;
         }
 
+        public static bool IsDefaultEnumUnderlyingType(Enumeration @enum)
+        {
+            return @enum.Type == BasicType.Int32;
+        }
+    }
+
+    // for template
+    public partial class ASTTraits
+    {
         public static bool IsTemplateParamType(NativeType type)
         {
             return false;
         }
     }
+
 }

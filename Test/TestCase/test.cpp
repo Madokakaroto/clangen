@@ -2,7 +2,7 @@ struct foo{};
 
 namespace foo
 {
-	enum class fee
+	enum class fee : unsigned int
 	{
 		num1 = 1,
 		num2,

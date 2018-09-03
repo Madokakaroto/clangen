@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace clangen
 {
-    public class TemplateProto : DotLiquid.Drop
+    public class TemplateProto
     {
         public List<TemplateParameter> ParametersList { get; private set; } 
             = new List<TemplateParameter>();
@@ -41,7 +41,7 @@ namespace clangen
         }
     }
 
-    public class TemplateParameter : DotLiquid.Drop
+    public class TemplateParameter
     {
         public string Name { get; }
         public bool IsVariadic { get; }

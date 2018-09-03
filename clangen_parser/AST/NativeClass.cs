@@ -4,11 +4,12 @@ using System.Diagnostics;
 
 namespace clangen
 {
-    public class NativeClass : DotLiquid.Drop
+    public class NativeClass
     {
         // auto property
         public string Name { get; }
         public bool Parsed { get; set; } = false;
+        public string UnscopedName { get; set; }
         public StructOrClass ClassTag { get; set; } = StructOrClass.InDoubt;
         public bool IsFinal { get; set; } = false;
         public bool IsAbstract { get; set; } = false;

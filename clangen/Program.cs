@@ -61,13 +61,13 @@ namespace clangen
             Template tmpl = ProcessTemplate();
             string result = tmpl.Render(Hash.FromAnonymousObject(new
             {
-                @enum
+                @enum = new EnumerationDrop(@enum)
             }));
         }
 
         static Template ProcessTemplate()
         {
-            string source = File.ReadAllText("../../Test/TestCase/Templates/enum_item.cpp");
+            string source = File.ReadAllText("../../Test/TestCase/Templates/enum_item.tmpl");
             Template enumTemplate = Template.Parse(source);
             return enumTemplate;
         }

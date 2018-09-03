@@ -5,7 +5,7 @@ using System.Diagnostics;
 
 namespace clangen
 {
-    public class EnumField : DotLiquid.Drop
+    public class EnumField
     {
         public string Name { get; set; }
         public long Constant { get; set; }
@@ -13,7 +13,7 @@ namespace clangen
         public static EnumField Invalid = new EnumField();
     }
 
-    public class Enumeration : DotLiquid.Drop
+    public class Enumeration
     {
         public string Name { get; }
         public string UnscopedName { get; set; }

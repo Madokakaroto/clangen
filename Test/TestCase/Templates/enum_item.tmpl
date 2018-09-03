@@ -1,0 +1,6 @@
+    public enum class {{ enum.name | append: ' ' }} {%- if enum.is_default != true -%} : {{ enum.underlying_type }} {% endif %}
+    { 
+	{%- for field in enum.Fields -%}
+        {{ field.Name }} = {{ field.Constant }},
+	{%- endfor -%}
+    }

@@ -2,7 +2,7 @@
 
 namespace clangen
 {
-    public class AST : DotLiquid.Drop
+    public class AST
     {
         private Dictionary<string, NativeClass> classes_ = new Dictionary<string, NativeClass>();
         private Dictionary<string, NativeType> types_ = new Dictionary<string, NativeType>();

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace clangen
 {
-    public class ClassTemplate : DotLiquid.Drop
+    public class ClassTemplate
     {
         public TemplateProto TP { get; set; }
         public string ID { get; }
