@@ -4,7 +4,7 @@ using System.Diagnostics;
 
 namespace clangen
 {
-    public class NativeClass
+    public class NativeClass : DotLiquid.Drop
     {
         // auto property
         public string Name { get; }

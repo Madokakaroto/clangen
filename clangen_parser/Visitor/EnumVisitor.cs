@@ -16,11 +16,20 @@ namespace clangen
 
         public bool DoVisit(CXCursor cursor, CXCursor parent)
         {
-            string name = clang.getCursorSpelling(cursor).ToString();
+            //string name = clang.getCursorSpelling(cursor).ToString();
+            string name = clang.getTypeSpelling(clang.getCursorType(cursor)).ToString();
 
             Enumeration @enum = AST_.GetEnum(name);
             if(!@enum.Parsed)
             {
+                // unscoped name
+                @enum.UnscopedName = clang.getCursorSpelling(cursor).ToString();
+
+                // underlying type
+                CXType underlyingType = clang.getEnumDeclIntegerType(cursor);
+                BasicType type = ClangTraits.ToBasicType(underlyingType);
+                @enum.Type = type;
+
                 // is scoped
                 @enum.IsEnumClass = clang.EnumDecl_isScoped(cursor) != 0;
 
@@ -49,22 +58,17 @@ namespace clangen
                 // get constant name
                 string constantName = clang.getCursorSpelling(cursor).ToString();
 
-                // get underlying type
-                CXType underlyingType = clang.getEnumDeclIntegerType(parent);
-                BasicType type = ClangTraits.ToBasicType(underlyingType);
-
                 // get enum constant value
-                EnumField c;
-                if(ClangTraits.IsSigned(underlyingType))
+                EnumField c = new EnumField { Name = constantName };
+                CXType underlyingType = clang.getEnumDeclIntegerType(parent);
+                if (ClangTraits.IsSigned(underlyingType))
                 {
-                    long constantValue = clang.getEnumConstantDeclValue(cursor);
-                    c = new EnumField(constantName, type, constantValue);
+                    c.Constant = clang.getEnumConstantDeclValue(cursor);
                 }
                 else
                 {
                     Debug.Assert(ClangTraits.IsUnsigned(underlyingType));
-                    ulong constantValue = clang.getEnumConstantDeclUnsignedValue(cursor);
-                    c = new EnumField(constantName, type, constantValue);
+                    c.Constant = (long)clang.getEnumConstantDeclUnsignedValue(cursor);
                 }
 
                 // add it to enumeration

@@ -4,6 +4,27 @@ using DotLiquid;
 
 namespace clangen
 {
+    public class User
+    {
+        public string Name { get; set; }
+        public string Email { get; set; }
+    }
+
+    public class UserDrop : Drop
+    {
+        private readonly User _user;
+
+        public string Name
+        {
+            get { return _user.Name; }
+        }
+
+        public UserDrop(User user)
+        {
+            _user = user;
+        }
+    }
+
     class Program
     {
         static void Main(string[] args)
@@ -33,7 +54,22 @@ namespace clangen
             Parser p = new Parser(libclang_path);
             CppConfig cppConfig = Configure.GetCppConfig(filePath);
             AST ast = p.ParseWithClangArgs(cppConfig);
-            return;
+
+            Enumeration @enum = ast.GetEnum("foo::fee");
+
+            // create template
+            Template tmpl = ProcessTemplate();
+            string result = tmpl.Render(Hash.FromAnonymousObject(new
+            {
+                @enum
+            }));
+        }
+
+        static Template ProcessTemplate()
+        {
+            string source = File.ReadAllText("../../Test/TestCase/Templates/enum_item.cpp");
+            Template enumTemplate = Template.Parse(source);
+            return enumTemplate;
         }
     }
 }

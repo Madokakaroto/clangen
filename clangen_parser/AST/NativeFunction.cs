@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace clangen
 {
-    public class NativeFunction
+    public class NativeFunction : DotLiquid.Drop
     {
         public string Name { get; }
         public bool Parsed { get; set; } = false;

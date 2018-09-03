@@ -25,40 +25,40 @@ namespace clangen
         Default
     }
 
-    public class Field
+    public class Field : DotLiquid.Drop
     {
-        public AccessSpecifier Access;
-        public NativeType Type;
-        public bool IsStatic;
+        public AccessSpecifier Access { get; set; }
+        public NativeType Type { get; set; }
+        public bool IsStatic { get; set; }
     }
 
-    public class BaseClass
+    public class BaseClass : DotLiquid.Drop
     {
-        public AccessSpecifier Access;
-        public NativeClass Class;
-        public bool IsVirtual;
+        public AccessSpecifier Access { get; set; }
+        public NativeClass Class { get; set; }
+        public bool IsVirtual { get; set; }
     }
 
-    public class SubClass
+    public class SubClass : DotLiquid.Drop
     {
-        public AccessSpecifier Access;
-        public NativeClass Class;
+        public AccessSpecifier Access { get; set; }
+        public NativeClass Class { get; set; }
     }
 
-    public class MemberType
+    public class MemberType : DotLiquid.Drop
     {
-        public AccessSpecifier Access;
-        public NativeType Type;
+        public AccessSpecifier Access { get; set; }
+        public NativeType Type { get; set; }
     }
 
-    public class FunctionParameter
+    public class FunctionParameter : DotLiquid.Drop
     {
         public string Name { get; set; }
         public NativeType Type { get; set; }
         public string DefaultValue { get; set; }
     }
 
-    public class Method
+    public class Method : DotLiquid.Drop
     {
         private NativeClass class_;
         public string Name { get; }
@@ -97,7 +97,7 @@ namespace clangen
         }
     }
 
-    public class Constructor
+    public class Constructor : DotLiquid.Drop
     {
         public bool IsConvert { get; }
         public bool IsCopy { get; }

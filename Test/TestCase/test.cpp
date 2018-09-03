@@ -1,8 +1,11 @@
 struct foo{};
 
-enum class fee
+namespace foo
 {
-	num1 = 1,
-	num2,
-	num3
-};
+	enum class fee
+	{
+		num1 = 1,
+		num2,
+		num3
+	};
+}

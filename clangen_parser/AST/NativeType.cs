@@ -34,7 +34,7 @@ namespace clangen
         Ptr
     }
 
-    public class TypeInfo
+    public class TypeInfo : DotLiquid.Drop
     {
         public BasicType Type { get; private set; }
         private object Info;
@@ -64,7 +64,7 @@ namespace clangen
         }
     }
 
-    public class NativeType
+    public class NativeType : DotLiquid.Drop
     {
         // property
         public string TypeName { get; }
