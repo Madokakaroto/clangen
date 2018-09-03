@@ -38,13 +38,19 @@ namespace clangen
         public NativeClass Class { get; set; }
         public bool IsVirtual { get; set; }
     }
-
+    
     public class SubClass
     {
         public AccessSpecifier Access { get; set; }
         public NativeClass Class { get; set; }
     }
-
+    
+    public class SubEnum
+    {
+        public AccessSpecifier Access { get; set; }
+        public Enumeration Enum { get; set; }
+    }
+    
     public class MemberType
     {
         public AccessSpecifier Access { get; set; }

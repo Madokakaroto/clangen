@@ -56,4 +56,10 @@ namespace clangen
         }
     }
 
+    // misc
+    public partial class ASTTraits
+    {
+
+    }
+
 }

@@ -35,10 +35,6 @@ namespace clangen
 
         void DropUnderlyingType(Enumeration @enum)
         {
-            //if(!ASTTraits.IsDefaultEnumUnderlyingType(@enum))
-            //    UnderlyingType = " : " + @enum.Type.ToString();
-            //else
-            //    UnderlyingType = "";
             IsDefault = ASTTraits.IsDefaultEnumUnderlyingType(@enum);
             UnderlyingType = @enum.Type.ToString();
         }

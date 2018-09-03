@@ -45,9 +45,9 @@ namespace clangen
                 // visit children
                 clang.visitChildren(cursor, Visitor, new CXClientData((IntPtr)classHandle));
 
+                // parse complete
                 @class.Parsed = true;
             }
-
             return true;
         }
 
@@ -85,13 +85,17 @@ namespace clangen
                 case CXCursorKind.CXCursor_TypeAliasDecl:
                     ProcessTypeExport(thisClass, cursor, parent);
                     break;
-                case CXCursorKind.CXCursor_ClassTemplate:
-                case CXCursorKind.CXCursor_ClassTemplatePartialSpecialization:
-                    break;
-                case CXCursorKind.CXCursor_FunctionTemplate:
-                    break;
+                //case CXCursorKind.CXCursor_ClassTemplate:
+                //case CXCursorKind.CXCursor_ClassTemplatePartialSpecialization:
+                //    break;
+                //case CXCursorKind.CXCursor_FunctionTemplate:
+                //    break;
                 case CXCursorKind.CXCursor_Constructor:
                     ProcessConstructor(thisClass, cursor, parent);
+                    break;
+                case CXCursorKind.CXCursor_EnumDecl:
+                    EnumVisitor subEnumVisitor = new EnumVisitor(AST_, thisClass);
+                    subEnumVisitor.DoVisit(cursor, parent);
                     break;
                 default:
                     break;
@@ -238,6 +242,9 @@ namespace clangen
             CXCursor parent                     // parent cursor
             )
         {
+            // set unscoped name
+            thisClass.UnscopedName = clang.getCursorSpelling(cursor).ToString();
+
             // set struct or class
             thisClass.ClassTag = ClangTraits.ToStructOrClass(cursor.kind);
 

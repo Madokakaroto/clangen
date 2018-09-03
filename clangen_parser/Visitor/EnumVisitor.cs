@@ -8,10 +8,12 @@ namespace clangen
     class EnumVisitor : IASTVisitor
     {
         private AST AST_;
+        private NativeClass OwnerClass_;
 
-        public EnumVisitor(AST ast)
+        public EnumVisitor(AST ast, NativeClass ownerClass = null)
         {
             AST_ = ast;
+            OwnerClass_ = ownerClass;
         }
 
         public bool DoVisit(CXCursor cursor, CXCursor parent)
@@ -22,16 +24,7 @@ namespace clangen
             Enumeration @enum = AST_.GetEnum(name);
             if(!@enum.Parsed)
             {
-                // unscoped name
-                @enum.UnscopedName = clang.getCursorSpelling(cursor).ToString();
-
-                // underlying type
-                CXType underlyingType = clang.getEnumDeclIntegerType(cursor);
-                BasicType type = ClangTraits.ToBasicType(underlyingType);
-                @enum.Type = type;
-
-                // is scoped
-                @enum.IsEnumClass = clang.EnumDecl_isScoped(cursor) != 0;
+                ProcessEnumDetail(@enum, cursor, parent);
 
                 // create IntPtr for context
                 GCHandle enumHandle = GCHandle.Alloc(@enum);
@@ -75,6 +68,31 @@ namespace clangen
                 thisEnum.AddConstant(c);
             }
             return CXChildVisitResult.CXChildVisit_Continue;
+        }
+
+        void ProcessEnumDetail(Enumeration @enum, CXCursor cursor, CXCursor parent)
+        {
+            // unscoped name
+            @enum.UnscopedName = clang.getCursorSpelling(cursor).ToString();
+
+            // underlying type
+            CXType underlyingType = clang.getEnumDeclIntegerType(cursor);
+            BasicType type = ClangTraits.ToBasicType(underlyingType);
+            @enum.Type = type;
+
+            // is scoped
+            @enum.IsEnumClass = clang.EnumDecl_isScoped(cursor) != 0;
+
+            // check is parent is a class
+            if(OwnerClass_ != null)
+            {
+                Debug.Assert(ClangTraits.IsUserDefinedTypeDecl(parent));
+                OwnerClass_.AddSubEnum(new SubEnum
+                {
+                    Access = ClangTraits.ToAccessSpecifier(clang.getCXXAccessSpecifier(cursor)),
+                    Enum = @enum
+                });
+            }
         }
     }
 }

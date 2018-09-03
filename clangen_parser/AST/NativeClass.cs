@@ -23,11 +23,12 @@ namespace clangen
         // for embedded class
         public bool IsEmbedded { get; set; } = false;
         public NativeClass OwnerClass { get; set; } = null;
-        public AccessSpecifier Access { get; set; } = AccessSpecifier.Private;
+        public AccessSpecifier OwnerAccess { get; set; } = AccessSpecifier.Private;
 
         // private data
         public List<BaseClass> BaseClasses { get; } = new List<BaseClass>();
         public List<SubClass> SubClasses { get; } = new List<SubClass>();
+        public List<SubEnum> SubEnums { get; } = new List<SubEnum>();
         public List<MemberType> MemberTypes { get; } = new List<MemberType>();
         public List<Constructor> Constructors { get; } = new List<Constructor>();
 
@@ -54,6 +55,11 @@ namespace clangen
         public void AddMemberType(MemberType type)
         {
             MemberTypes.Add(type);
+        }
+
+        public void AddSubEnum(SubEnum @enum)
+        {
+            SubEnums.Add(@enum);
         }
 
         public void AddMethod(Method func)

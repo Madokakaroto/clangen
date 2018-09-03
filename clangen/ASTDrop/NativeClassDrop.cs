@@ -6,9 +6,13 @@ using System.Threading.Tasks;
 
 namespace clangen
 {
-    class NativeClassDrop
+    class NativeClassDrop : DotLiquid.Drop
     {
-        public NativeClassDrop(NativeClass nativeClass)
+        public string Name { get; }
+        public string UnscopedName { get; }
+        public object Extra { get; }
+
+        public NativeClassDrop(NativeClass nativeClass, object extra)
         {
 
         }
