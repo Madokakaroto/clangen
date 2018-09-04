@@ -1,0 +1,6 @@
+Templates:
+  NativeClass:
+    Template: "123"
+  Enumeration:
+    Template: ""
+  

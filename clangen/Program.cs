@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Collections.Generic;
 using DotLiquid;
 
 namespace clangen
@@ -54,22 +55,6 @@ namespace clangen
             Parser p = new Parser(libclang_path);
             CppConfig cppConfig = Configure.GetCppConfig(filePath);
             AST ast = p.ParseWithClangArgs(cppConfig);
-
-            Enumeration @enum = ast.GetEnum("foo::fee");
-
-            // create template
-            Template tmpl = ProcessTemplate();
-            string result = tmpl.Render(Hash.FromAnonymousObject(new
-            {
-                @enum = new EnumerationDrop(@enum)
-            }));
-        }
-
-        static Template ProcessTemplate()
-        {
-            string source = File.ReadAllText("../../Test/TestCase/Templates/enum_item.tmpl");
-            Template enumTemplate = Template.Parse(source);
-            return enumTemplate;
         }
     }
 }

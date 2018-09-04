@@ -7,6 +7,13 @@ using YamlDotNet.Serialization.NamingConventions;
 
 namespace clangen
 {
+    public class UserTest111
+    {
+        public string Name { get; set; } = "";
+        public string Email { get; set; } = "";
+    }
+
+
     public class Configure
     {
         public static CppConfig GetCppConfig(string configFile)
@@ -19,6 +26,29 @@ namespace clangen
 
             CppConfig cppConfig = deserializer.Deserialize<CppConfig>(fileContent);
             cppConfig.Sources = ToAbsolutPath(cppConfig.Sources);
+
+
+            //test
+
+            Dictionary<string, UserTest111> dict = new Dictionary<string, UserTest111>();
+            dict.Add("1", new UserTest111 { Name = "123", Email = "123@qq.com" });
+            dict.Add("2", new UserTest111 { Name = "234", Email = "123@qq.com" });
+            dict.Add("3", new UserTest111 { Name = "345", Email = "123@qq.com" });
+
+            var deserializer1 = new DeserializerBuilder().Build();
+            var serializer = new SerializerBuilder().Build();
+            string yaml = serializer.Serialize(dict);
+            yaml = @"1:
+  Name: 123
+  Email: 123@qq.com
+2: 
+3:
+  Name: 345
+  Email: 123@qq.com";
+
+            Dictionary<string, UserTest111> ddd = deserializer1.Deserialize<Dictionary<string, UserTest111>>(yaml);
+
+
             return cppConfig;
         }
 
