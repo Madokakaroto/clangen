@@ -56,8 +56,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="ExportCli\Config.yaml" />
     <None Include="ExportCli\Templates\enum_item.tmpl" />
-    <None Include="ExportCli\Templates\native_class.tmpl" />
+    <None Include="ExportCli\Templates\native_class_cpp.tmpl" />
+    <None Include="ExportCli\Templates\native_class_h.tmpl" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

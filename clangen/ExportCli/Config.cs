@@ -36,7 +36,9 @@ namespace clangen.cli
 
     class Config
     {
+        public string DefaultNamespace { get; set; } = "";
         public Dictionary<string, ClassExtra> Classes;
+        public List<string> Enums;
     }
 
 }
