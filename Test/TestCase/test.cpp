@@ -1,11 +1,6 @@
-struct foo{};
-
 namespace foo
 {
-	enum class fee : unsigned int
+	class fee
 	{
-		num1 = 1,
-		num2,
-		num3
 	};
 }

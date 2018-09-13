@@ -240,5 +240,30 @@ namespace clangen
                 return true;
             return tokens[count - 2] == "...";
         }
+
+        public static string ToString(CXDiagnosticSeverity severity)
+        {
+            switch (severity)
+            {
+                case CXDiagnosticSeverity.CXDiagnostic_Error:
+                    return "Error";
+                case CXDiagnosticSeverity.CXDiagnostic_Fatal:
+                    return "Fatal";
+                case CXDiagnosticSeverity.CXDiagnostic_Ignored:
+                    return "Ignore";
+                case CXDiagnosticSeverity.CXDiagnostic_Note:
+                    return "Note";
+                case CXDiagnosticSeverity.CXDiagnostic_Warning:
+                    return "Warning";
+                default:
+                    return "Unknown";
+            }
+        }
+
+        public static bool IsFatal(CXDiagnosticSeverity severity)
+        {
+            return CXDiagnosticSeverity.CXDiagnostic_Fatal == severity ||
+                CXDiagnosticSeverity.CXDiagnostic_Error == severity;
+        }
     }
 }

@@ -48,7 +48,7 @@ namespace clangen
                 Console.WriteLine(error);
                 return;
             }
-
+            
             string libclang_path = Environment.CurrentDirectory;
             int index = libclang_path.LastIndexOf('\\');
             libclang_path = libclang_path.Substring(0, index);

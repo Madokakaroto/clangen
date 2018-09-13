@@ -299,12 +299,13 @@ namespace clangen
             // create field object
             Field f = new Field
             {
+                Name = fieldName,
                 Access = access,
                 Type = nativeType,
                 IsStatic = isStatic
             };
 
-            thisClass.AddField(fieldName, f);
+            thisClass.AddField(f);
         }
 
         private void ProcessTypeExport(NativeClass thisClass, CXCursor cursor, CXCursor parent)

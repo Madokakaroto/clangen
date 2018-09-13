@@ -24,6 +24,8 @@ namespace clangen
             Enumeration @enum = AST_.GetEnum(name);
             if(!@enum.Parsed)
             {
+                @enum.Parsed = true;
+
                 ProcessEnumDetail(@enum, cursor, parent);
 
                 // create IntPtr for context
@@ -31,9 +33,6 @@ namespace clangen
 
                  // visit children
                 clang.visitChildren(cursor, Visitor, new CXClientData((IntPtr)enumHandle));
-
-                // add class
-                @enum.Parsed = true;
             }
 
             return true;

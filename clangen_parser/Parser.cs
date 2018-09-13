@@ -64,17 +64,18 @@ namespace clangen
                 option, out TU);
             if (error != CXErrorCode.CXError_Success)
             {
-                Console.WriteLine("Error: " + error);
-                var numDiagnostics = clang.getNumDiagnostics(TU);
-
-                for (uint i = 0; i < numDiagnostics; ++i)
-                {
-                    var diagnostic = clang.getDiagnostic(TU, i);
-                    Console.WriteLine(clang.getDiagnosticSpelling(diagnostic).ToString());
-                    clang.disposeDiagnostic(diagnostic);
-                }
+                Console.WriteLine("Failed to parse Translation Unit!");
                 return null;
             }
+
+            bool fatal = false;
+            var numDiagnostics = clang.getNumDiagnostics(TU);
+            for(uint loop = 0; loop < numDiagnostics; ++loop)
+            {
+                fatal |= DealingWithDiagnostic(clang.getDiagnostic(TU, loop));
+            }
+            if (fatal)
+                return null;
 
             ASTVisitor visitor = new ASTVisitor();
             AST ast = visitor.Visit(TU);
@@ -90,5 +91,35 @@ namespace clangen
 
         [DllImport("kernel32.dll", SetLastError = true)]
         static extern bool SetDllDirectory(string lpPathName);
+
+        private bool DealingWithDiagnostic(CXDiagnostic d)
+        {
+            // error spelling
+            string spelling = clang.getDiagnosticSpelling(d).ToString();
+
+            // category text
+            string categoryText = clang.getDiagnosticCategoryText(d).ToString();
+
+            // severity text
+            CXDiagnosticSeverity severity = clang.getDiagnosticSeverity(d);
+            string severityStr = ClangTraits.ToString(severity);
+
+            // source location
+            CXSourceLocation location = clang.getDiagnosticLocation(d);
+            CXFile file = new CXFile(IntPtr.Zero);
+            clang.getInstantiationLocation(
+                location,
+                out file,
+                out uint line,
+                out uint column,
+                out uint offset);
+
+            string fileName = clang.getFileName(file).ToString();
+            clang.disposeDiagnostic(d);
+
+            string errorString = string.Format("{0}: {1}-{2}, IN {3}, line: {4}, column: {5}",
+                severityStr, spelling, categoryText, fileName, line, column);
+            return ClangTraits.IsFatal(severity);
+        }
     }
 }

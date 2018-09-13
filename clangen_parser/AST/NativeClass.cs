@@ -34,8 +34,7 @@ namespace clangen
 
         private Dictionary<string, List<Method>> methods_
             = new Dictionary<string, List<Method>>();
-        private Dictionary<string, Field> fields_
-            = new Dictionary<string, Field>();
+        public readonly List<Field> Fields = new List<Field>();
 
         public NativeClass(string name)
         {
@@ -79,13 +78,39 @@ namespace clangen
             methods_[funcName].Add(func);
         }
 
-        public void AddField(string name, Field field)
+        public List<Method> Methods
         {
-            Debug.Assert(!fields_.ContainsKey(name));
-            if(!fields_.ContainsKey(name))
+            get
             {
-                fields_.Add(name, field);
+                List<Method> methods = new List<Method>();
+                foreach(List<Method> ms in methods_.Values)
+                {
+                    methods.AddRange(ms);
+                }
+                return methods;
             }
+        }
+
+        public List<Method> GetMethod(string methodName)
+        {
+            if (methods_.ContainsKey(methodName))
+                return methods_[methodName];
+            return null;
+        }
+
+        public void AddField(Field field)
+        {
+            Fields.Add(field);
+        }
+
+        public Field GetField(string fieldName)
+        {
+            foreach(Field field in Fields)
+            {
+                if (field.Name == fieldName)
+                    return field;
+            }
+            return null;
         }
 
         public void AddConstructor(Constructor ctor)
