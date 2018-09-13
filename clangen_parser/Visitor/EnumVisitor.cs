@@ -53,7 +53,7 @@ namespace clangen
                 // get enum constant value
                 EnumField c = new EnumField { Name = constantName };
                 CXType underlyingType = clang.getEnumDeclIntegerType(parent);
-                NativeType underlyingNativeType = TypeVisitor.GetNativeType(AST_, underlyingType);
+                NativeType underlyingNativeType = TypeVisitorHelper.GetNativeType(AST_, underlyingType);
                 if (ASTTraits.IsSigned(underlyingNativeType))
                 {
                     c.Constant = clang.getEnumConstantDeclValue(cursor);

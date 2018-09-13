@@ -114,7 +114,7 @@ namespace clangen
                 // check access specifier
                 Access = ClangTraits.ToAccessSpecifier(clang.getCXXAccessSpecifier(cursor)),
                 // native class type
-                Type = TypeVisitor.GetNativeType(AST_, type),
+                Type = TypeVisitorHelper.GetNativeType(AST_, type),
                 // check is virtual base
                 IsVirtual = clang.isVirtualBase(cursor) != 0
             };
@@ -176,7 +176,7 @@ namespace clangen
 
             // proces result type
             CXType resultType = clang.getCursorResultType(cursor);
-            memberFunc.ResultType = TypeVisitor.GetNativeType(AST_, resultType);
+            memberFunc.ResultType = TypeVisitorHelper.GetNativeType(AST_, resultType);
 
             // deep visit children
             GCHandle delegateHandler = GCHandle.Alloc(func);
@@ -202,7 +202,7 @@ namespace clangen
                 FunctionParameter param = new FunctionParameter
                 {
                     Name = clang.getCursorSpelling(cursor).ToString(),
-                    Type = TypeVisitor.GetNativeType(AST_, type)
+                    Type = TypeVisitorHelper.GetNativeType(AST_, type)
                 };
 
                 clang.visitChildren(cursor, (CXCursor c, CXCursor p, IntPtr d) => 
@@ -255,16 +255,10 @@ namespace clangen
             thisClass.IsVirtualBase = clang.isVirtualBase(cursor) != 0;
 
             // set template instance info
-            int templateNum = clang.Type_getNumTemplateArguments(type);
-            if(templateNum > 0)
+            if(TemplateHelper.VisitTemplate(cursor, thisClass, AST_))
             {
-                thisClass.SetTemplateParameterCount(templateNum);
-                for (int loop = 0; loop < templateNum; ++loop)
-                {
-                    CXType argType = clang.Type_getTemplateArgumentAsType(type, (uint)loop);
-                    NativeType nativeType = TypeVisitor.GetNativeType(AST_, argType);
-                    thisClass.SetTemplateParameter((uint)loop, nativeType);
-                }
+                TypeVisitContext context = new TypeVisitContext(cursor);
+                TemplateHelper.VisitTemplateParameter(cursor, type, thisClass, AST_, context);
             }
 
             // set subclass
@@ -291,7 +285,7 @@ namespace clangen
 
             // get field type
             CXType type = clang.getCursorType(cursor);
-            NativeType nativeType = TypeVisitor.GetNativeType(AST_, type);
+            NativeType nativeType = TypeVisitorHelper.GetNativeType(AST_, type);
 
             // get field access specifier
             AccessSpecifier access = ClangTraits.ToAccessSpecifier(clang.getCXXAccessSpecifier(cursor));
@@ -312,7 +306,7 @@ namespace clangen
         {
             // get field type
             CXType type = clang.getCursorType(cursor);
-            NativeType nativeType = TypeVisitor.GetNativeType(AST_, type);
+            NativeType nativeType = TypeVisitorHelper.GetNativeType(AST_, type);
 
             // get field access specifier
             AccessSpecifier access = ClangTraits.ToAccessSpecifier(clang.getCXXAccessSpecifier(cursor));

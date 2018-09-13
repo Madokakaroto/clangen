@@ -23,9 +23,9 @@ namespace clangen
             ParametersList.Add(param);
         }
 
-        public TemplateParameter GetTemplateParameter(int index)
+        public TemplateParameter GetTemplateParameter(uint index)
         {
-            return ParametersList[index];
+            return ParametersList[(int)index];
         }
 
         public TemplateParameter GetTemplateParameter(string name)
@@ -35,8 +35,17 @@ namespace clangen
                 if (param.Name == name)
                     return param;
             }
-            Debug.Assert(false);
             return null;
+        }
+
+        public int GetTemplateParameterIndex(string name)
+        {
+            for(int loop = 0; loop < ParametersList.Count; ++loop)
+            {
+                if (ParametersList[loop].Name == name)
+                    return loop;
+            }
+            return -1;
         }
 
         public int Count { get { return ParametersList.Count; } }

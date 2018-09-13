@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Diagnostics;
 using System.Collections.Generic;
 using DotLiquid;
 
@@ -55,6 +56,14 @@ namespace clangen
             Parser p = new Parser(libclang_path);
             CppConfig cppConfig = Configure.GetCppConfig(filePath);
             AST ast = p.ParseWithClangArgs(cppConfig);
+
+            //NativeType type = ast.GetType(
+            //    "std::map<int, double, std::less<int>, std::allocator<std::pair<const int, double>>");
+
+            //ASTTraits.IsInstanceOf(type, "std::map");
+            //NativeType keyType = ASTTraits.KeyType(type);
+            //NativeType mappedType = ASTTraits.MappedType(type);
+            //Debug.Assert(ASTTraits.IsSameType(keyType, mappedType));
         }
     }
 }

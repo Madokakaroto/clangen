@@ -213,8 +213,7 @@ namespace clangen
 
         public static bool IsUserDefinedTypeDecl(CXCursor cursor)
         {
-            return cursor.kind == CXCursorKind.CXCursor_ClassDecl ||
-                cursor.kind == CXCursorKind.CXCursor_StructDecl;
+            return IsUserDefinedTypeDecl(cursor.kind);
         }
 
         public static bool IsUserDefinedTypeDecl(CXCursorKind cursorKind)
@@ -264,6 +263,29 @@ namespace clangen
         {
             return CXDiagnosticSeverity.CXDiagnostic_Fatal == severity ||
                 CXDiagnosticSeverity.CXDiagnostic_Error == severity;
+        }
+
+        public static bool IsNonTypeTemplateParamLiteral(CXCursor cursor)
+        {
+            switch (cursor.kind)
+            {
+                case CXCursorKind.CXCursor_IntegerLiteral:
+                case CXCursorKind.CXCursor_CXXBoolLiteralExpr:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        public static bool IsInvalid(CXCursor cursor)
+        {
+            return cursor.kind >= CXCursorKind.CXCursor_FirstInvalid &&
+                cursor.kind <= CXCursorKind.CXCursor_LastInvalid;
+        }
+
+        public static bool IsTemplateRef(CXCursor cursor)
+        {
+            return CXCursorKind.CXCursor_TemplateRef == cursor.kind;
         }
     }
 }

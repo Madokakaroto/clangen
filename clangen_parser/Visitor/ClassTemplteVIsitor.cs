@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using ClangSharp;
 
@@ -78,7 +79,7 @@ namespace clangen
                         tp.AddTemplateParameter(GetTemplateTypeParameter(c));
                         break;
                     case CXCursorKind.CXCursor_NonTypeTemplateParameter:
-                        tp.AddTemplateParameter(GetTemplateNonTypeParameter(AST_, c));
+                        tp.AddTemplateParameter(GetTemplateNonTypeParameter(AST_, tp, c));
                         break;
                     case CXCursorKind.CXCursor_TemplateTemplateParameter:
                         tp.AddTemplateParameter(GetTemplateTemplateParameter(c));
@@ -99,14 +100,14 @@ namespace clangen
             return param;
         }
 
-        private TemplateParameter GetTemplateNonTypeParameter(AST ast, CXCursor cursor)
+        private TemplateParameter GetTemplateNonTypeParameter(AST ast, TemplateProto tp, CXCursor cursor)
         {
             string paramName = clang.getCursorSpelling(cursor).ToString();
             bool isVariadic = ClangTraits.IsVariadicTemplateParameter(cursor);
 
             // check if dependent or nontype
             bool isDependent = false;
-            string dependName;
+            string dependName = null;
             clang.visitChildren(cursor, (CXCursor c, CXCursor p, IntPtr data) =>
             {
                 if(CXCursorKind.CXCursor_TypeRef == c.kind)
@@ -117,14 +118,19 @@ namespace clangen
                 return CXChildVisitResult.CXChildVisit_Continue;
             }, new CXClientData(IntPtr.Zero));
 
-
             TemplateParameter param;
             if (isDependent)
+            {
+                Debug.Assert(dependName != null);
                 param = new TemplateParameter(paramName, TemplateParameterKind.Dependent, isVariadic);
+                TemplateParameter dependeParam = tp.GetTemplateParameter(dependName);
+                Debug.Assert(dependeParam != null);
+                param.SetExtra(dependeParam);
+            }
             else
             {
                 CXType type = clang.getCursorType(cursor);
-                NativeType nativeType = TypeVisitor.GetNativeType(AST_, type);
+                NativeType nativeType = TypeVisitorHelper.GetNativeType(AST_, type);
                 param = new TemplateParameter(paramName, TemplateParameterKind.NoneType, isVariadic);
                 param.SetExtra(nativeType);
             }

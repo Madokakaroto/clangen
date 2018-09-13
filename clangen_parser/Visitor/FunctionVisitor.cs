@@ -34,7 +34,7 @@ namespace clangen
 
                 // proces result type
                 CXType resultType = clang.getCursorResultType(cursor);
-                proto.ResultType = TypeVisitor.GetNativeType(AST_, resultType);
+                proto.ResultType = TypeVisitorHelper.GetNativeType(AST_, resultType);
 
                 // create IntPtr for context
                 GCHandle protoHandle = GCHandle.Alloc(proto);
@@ -62,7 +62,7 @@ namespace clangen
                 FunctionParameter param = new FunctionParameter
                 {
                     Name = clang.getCursorSpelling(cursor).ToString(),
-                    Type = TypeVisitor.GetNativeType(AST_, type)
+                    Type = TypeVisitorHelper.GetNativeType(AST_, type)
                 };
 
                 clang.visitChildren(cursor, (CXCursor c, CXCursor p, IntPtr d) => 

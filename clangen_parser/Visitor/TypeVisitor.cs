@@ -1,12 +1,13 @@
-﻿using ClangSharp;
-using System;
+﻿using System;
 using System.Diagnostics;
+using System.Collections.Generic;
+using ClangSharp;
 
 namespace clangen
 {
-    public class TypeVisitor
+    public class TypeVisitorHelper
     {
-        public static NativeType GetNativeType(AST ast, CXType cxType)
+        public static NativeType GetNativeType(AST ast, CXType cxType, TypeVisitContext context = null)
         {
             CXType type = cxType;
             if(ClangTraits.IsElaboratedType(type) || ClangTraits.IsUnexposedType(type))
@@ -29,7 +30,7 @@ namespace clangen
 
                 // not a type reference nor a type with qualifiers
                 if (ClangTraits.IsTypeEntity(type) || typeName == "std::nullptr_t")
-                    ProcessTypeEntity(ast, nativeType, type, ClangTraits.IsUnexposedType(cxType));
+                    ProcessTypeEntity(ast, nativeType, type, context);
                 // using or typedef
                 else if (ClangTraits.IsTypedef(type))
                     ProcessTypedef(ast, nativeType, type);
@@ -47,7 +48,11 @@ namespace clangen
             return nativeType;
         }
 
-        private static void ProcessTypeEntity(AST ast, NativeType type, CXType cxType, bool isInstanciation)
+        private static void ProcessTypeEntity(
+            AST ast, 
+            NativeType type, 
+            CXType cxType,
+            TypeVisitContext context)
         {
             type.IsConst = ClangTraits.IsConst(cxType);
             if (ClangTraits.IsBuiltInType(cxType))
@@ -74,11 +79,14 @@ namespace clangen
 
                     // if native class is parsed already, the native class is a full specialization
                     // or the native class is a instantiation of a template or partial specialization
-                    if(isInstanciation && !nativeClass.Parsed)
+                    if(!nativeClass.Parsed)
                     {
-                        bool result = TemplateHelper.VisitTemplateArguments(cursor, nativeClass, ast);
-                        Debug.Assert(result);
-                        nativeClass.Parsed = result;
+                        nativeClass.Parsed = true;
+                        if(TemplateHelper.VisitTemplate(cursor, nativeClass, ast))
+                        {
+                            if (context != null) context.Consume();
+                            TemplateHelper.VisitTemplateParameter(cursor, theType, nativeClass, ast, context);
+                        }
                     }
 
                     type.SetClass(nativeClass);
@@ -168,8 +176,72 @@ namespace clangen
         }
     }
 
-    public class DependentTypeVisitor
+    public class TypeVisitContext
     {
-        //public static void 
+        private List<string> context_;
+
+        public TypeVisitContext(CXCursor cursor)
+        {
+            List<string> context = new List<string>();
+            clang.visitChildren(cursor, (CXCursor c, CXCursor p, IntPtr data) =>
+            {
+                if (ClangTraits.IsNonTypeTemplateParamLiteral(c))
+                {
+                    List<string> tokens = ASTVisitor.GetCursorTokens(c);
+                    context.Add(string.Concat(tokens));
+                }
+                else if (ClangTraits.IsTemplateRef(c))
+                {
+                    CXCursor refCursor = clang.getCursorReferenced(c);
+                    string templateID = clang.getCursorUSR(refCursor).ToString();
+                    context.Add(templateID);
+                }
+                return CXChildVisitResult.CXChildVisit_Continue;
+            }, new CXClientData(IntPtr.Zero));
+            context_ = context;
+        }
+
+        public string Consume()
+        {
+            Debug.Assert(context_.Count > 0);
+            string top = context_[0];
+            context_.RemoveAt(0);
+            return top;
+        }
+
+        public int Count { get { return context_.Count; } }
     }
+
+    public class TypeVisitor : IASTVisitor
+    {
+        AST AST_;
+
+        public TypeVisitor(AST ast)
+        {
+            AST_ = ast;
+        }
+
+        public bool DoVisit(CXCursor cursor, CXCursor parent)
+        {
+            CXType cxType = clang.getCursorType(cursor);
+            TypeVisitContext context = new TypeVisitContext(cursor);
+            context.Consume();
+            NativeType type = TypeVisitorHelper.GetNativeType(AST_, cxType, context);
+            Debug.Assert(ASTTraits.IsTypedef(type));
+            return true;
+            //NativeType typedefedType = type.Type as NativeType;
+            //if (ASTTraits.IsObject(typedefedType.TypeKind))
+            //{
+            //    NativeClass @class = typedefedType.Type as NativeClass;
+            //    if (!@class.Parsed)
+            //    {
+            //        @class.Parsed = true;
+            //        
+            //
+            //        TemplateHelper.VisitTemplateParameter(cursor, cxType, @class, AST_);
+            //    }
+            //}
+        }
+    }
+
 }

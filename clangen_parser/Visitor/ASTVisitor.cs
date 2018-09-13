@@ -70,7 +70,8 @@ namespace clangen
                     return CXChildVisitResult.CXChildVisit_Continue;
                 case CXCursorKind.CXCursor_TypeAliasDecl:
                 case CXCursorKind.CXCursor_TypedefDecl:
-                    TypeVisitor.GetNativeType(ast, clang.getCursorType(cursor));
+                    //TypeVisitorHelper.GetNativeType(ast, clang.getCursorType(cursor));
+                    visitor = new TypeVisitor(ast);
                     break;
                 case CXCursorKind.CXCursor_ClassTemplate:
                     visitor = new ClassTemplateVisitor(ast, this, false);

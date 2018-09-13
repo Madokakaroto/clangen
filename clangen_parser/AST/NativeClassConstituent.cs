@@ -133,4 +133,29 @@ namespace clangen
             ParamList.Add(param);
         }
     }
+
+    public class InstancedTemplateParam
+    {
+        public TemplateParameterKind Kind { get; }
+        public object Param { get; }
+
+        public InstancedTemplateParam(string literal)
+        {
+            Kind = TemplateParameterKind.NoneType;
+            Param = literal;
+        }
+
+        public InstancedTemplateParam(NativeType type)
+        {
+            Kind = TemplateParameterKind.Type;
+            Param = type;
+        }
+
+        public InstancedTemplateParam(ClassTemplate template)
+        {
+            Kind = TemplateParameterKind.Template;
+            Param = template;
+        }
+    }
+
 }

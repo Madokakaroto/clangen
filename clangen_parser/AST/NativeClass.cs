@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Diagnostics;
 
 namespace clangen
@@ -17,8 +16,11 @@ namespace clangen
 
         // for template instantiation
         public bool IsTemplateInstantiation { get; private set; } = false;
+        public bool IsFullSpecialization { get; set; } = false;
         public ClassTemplate InstanceOf { get; private set; } = null;
-        public NativeType[] TemplateParameters { get; private set; } = null;
+        public int TemplateParameterCount { get; private set; }
+        public List<InstancedTemplateParam> TemplateParameters { get; } 
+            = new List<InstancedTemplateParam>();
 
         // for embedded class
         public bool IsEmbedded { get; set; } = false;
@@ -66,8 +68,8 @@ namespace clangen
             string funcName = func.Name;
             if (methods_.ContainsKey(funcName))
             {
-                if (methods_[func.Name].Count() == 1)
-                    methods_[func.Name].ElementAt(0).IsOverload = true;
+                if (methods_[func.Name].Count == 1)
+                    methods_[func.Name][0].IsOverload = true;
 
                 func.IsOverload = true;
             }
@@ -126,12 +128,25 @@ namespace clangen
 
         public void SetTemplateParameterCount(int count)
         {
-            TemplateParameters = new NativeType[count];
+            TemplateParameterCount = count;
         }
 
         public void SetTemplateParameter(uint index, NativeType type)
         {
-            TemplateParameters[index] = type;
+            Debug.Assert(index < TemplateParameterCount);
+            TemplateParameters.Add(new InstancedTemplateParam(type));
+        }
+
+        public void SetTemplateParameter(uint index, string literal)
+        {
+            Debug.Assert(index < TemplateParameterCount);
+            TemplateParameters.Add(new InstancedTemplateParam(literal));
+        }
+
+        public void SetTemplateParameter(uint index, ClassTemplate template)
+        {
+            Debug.Assert(index < TemplateParameterCount);
+            TemplateParameters.Add(new InstancedTemplateParam(template));
         }
     }
 }

@@ -300,6 +300,21 @@ namespace clangen
             else
                 return type;
         }
+
+        public static NativeType KeyType(NativeType type)
+        {
+            return null;
+        }
+
+        public static NativeType MappedType(NativeType type)
+        {
+            return null;
+        }
+
+        public static bool IsSameType(NativeType lhs, NativeType rhs)
+        {
+            return true;
+        }
     }
 
     // misc
