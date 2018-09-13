@@ -16,7 +16,7 @@ namespace clangen
         public bool IsVirtualBase { get; set; } = false;
 
         // for template instantiation
-        public bool IsTemplateInstance { get; private set; } = false;
+        public bool IsTemplateInstantiation { get; private set; } = false;
         public ClassTemplate InstanceOf { get; private set; } = null;
         public NativeType[] TemplateParameters { get; private set; } = null;
 
@@ -93,9 +93,14 @@ namespace clangen
             Constructors.Add(ctor);
         }
 
-        public void SetTemplateParameterCount(uint count)
+        public void SetTemplate(ClassTemplate template)
         {
-            IsTemplateInstance = true;
+            IsTemplateInstantiation = true;
+            InstanceOf = template;
+        }
+
+        public void SetTemplateParameterCount(int count)
+        {
             TemplateParameters = new NativeType[count];
         }
 

@@ -8,39 +8,45 @@ namespace clangen
     {
         AST AST_;
         ASTVisitor visitor_;
+        bool isPartial_;
 
-        public ClassTemplateVisitor(AST ast, ASTVisitor visitor)
+        public ClassTemplateVisitor(AST ast, ASTVisitor visitor, bool isPartial)
         {
             AST_ = ast;
             visitor_ = visitor;
+            isPartial_ = isPartial;
         }
 
         public bool DoVisit(CXCursor cursor, CXCursor parent)
         {
             string id = clang.getCursorUSR(cursor).ToString();
             ClassTemplate template = AST_.GetClassTemplate(id);
+
             bool isDefinition = clang.isCursorDefinition(cursor) != 0;
-            if (!template.Parsed && isDefinition)
+            if (!template.Parsed)
             {
-                // proto
-                template.TP = GetTemplateProto(cursor);
+                if(template.TP == null)
+                {
+                    // proto
+                    template.TP = GetTemplateProto(cursor);
 
-                // name
-                template.Name = visitor_.GetCurrentScopeName(
-                    clang.getCursorDisplayName(cursor).ToString()
-                    );
+                    // name
+                    template.Name = visitor_.GetCurrentScopeName(
+                        clang.getCursorDisplayName(cursor).ToString()
+                        );
 
-                // spelling
-                template.Spelling = visitor_.GetCurrentScopeName(
-                    clang.getCursorSpelling(cursor).ToString()
-                    );
+                    // spelling
+                    template.Spelling = visitor_.GetCurrentScopeName(
+                        clang.getCursorSpelling(cursor).ToString()
+                        );
+                }
 
                 // do parse for template definition
-                if(clang.isCursorDefinition(cursor) != 0)
+                if(isDefinition)
                 {
+                    template.Parsed = true;
                     GCHandle classTemplateHandle = GCHandle.Alloc(template);
                     clang.visitChildren(cursor, Visitor, new CXClientData((IntPtr)classTemplateHandle));
-                    template.Parsed = true;
                 }
             }
             return true;
@@ -89,7 +95,7 @@ namespace clangen
         {
             string paramName = clang.getCursorSpelling(cursor).ToString();
             bool isVariadic = ClangTraits.IsVariadicTemplateParameter(cursor);
-            TemplateParameter param = new TemplateParameter(paramName, isVariadic);
+            TemplateParameter param = new TemplateParameter(paramName, TemplateParameterKind.Type, isVariadic);
             return param;
         }
 
@@ -97,10 +103,31 @@ namespace clangen
         {
             string paramName = clang.getCursorSpelling(cursor).ToString();
             bool isVariadic = ClangTraits.IsVariadicTemplateParameter(cursor);
-            TemplateParameter param = new TemplateParameter(paramName, isVariadic);
-            CXType type = clang.getCursorType(cursor);
-            NativeType nativeType = TypeVisitor.GetNativeType(AST_, type);
-            param.Set(nativeType);
+
+            // check if dependent or nontype
+            bool isDependent = false;
+            string dependName;
+            clang.visitChildren(cursor, (CXCursor c, CXCursor p, IntPtr data) =>
+            {
+                if(CXCursorKind.CXCursor_TypeRef == c.kind)
+                {
+                    isDependent = true;
+                    dependName = clang.getCursorSpelling(c).ToString();
+                }
+                return CXChildVisitResult.CXChildVisit_Continue;
+            }, new CXClientData(IntPtr.Zero));
+
+
+            TemplateParameter param;
+            if (isDependent)
+                param = new TemplateParameter(paramName, TemplateParameterKind.Dependent, isVariadic);
+            else
+            {
+                CXType type = clang.getCursorType(cursor);
+                NativeType nativeType = TypeVisitor.GetNativeType(AST_, type);
+                param = new TemplateParameter(paramName, TemplateParameterKind.NoneType, isVariadic);
+                param.SetExtra(nativeType);
+            }
             return param;
         }
 
@@ -108,9 +135,9 @@ namespace clangen
         {
             string paramName = clang.getCursorSpelling(cursor).ToString();
             bool isVariadic = ClangTraits.IsVariadicTemplateParameter(cursor);
-            TemplateParameter param = new TemplateParameter(paramName, isVariadic);
+            TemplateParameter param = new TemplateParameter(paramName, TemplateParameterKind.Template, isVariadic);
             TemplateProto proto = GetTemplateProto(cursor);
-            param.Set(proto);
+            param.SetExtra(proto);
             return param;
         }
     }

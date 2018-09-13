@@ -27,6 +27,7 @@ namespace clangen
 
     public class Field
     {
+        public string Name { get; set; }
         public AccessSpecifier Access { get; set; }
         public NativeType Type { get; set; }
         public bool IsStatic { get; set; }
@@ -35,7 +36,7 @@ namespace clangen
     public class BaseClass
     {
         public AccessSpecifier Access { get; set; }
-        public NativeClass Class { get; set; }
+        public NativeType Type { get; set; }
         public bool IsVirtual { get; set; }
     }
     
@@ -79,6 +80,7 @@ namespace clangen
         public List<FunctionParameter> ParamList { get; }
             = new List<FunctionParameter>();
         public NativeType ResultType { get; set; }
+        public AccessSpecifier Access { get; set; }
 
         public Method(
             NativeClass @class,

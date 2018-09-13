@@ -36,6 +36,8 @@ namespace clangen
             // dealing with defition and unsettled types
             if (!@class.Parsed && isDefinition)
             {
+                @class.Parsed = true;
+
                 //proces class detail
                 ProcessClassDetail(@class, cursor, type, parent);
 
@@ -44,9 +46,6 @@ namespace clangen
 
                 // visit children
                 clang.visitChildren(cursor, Visitor, new CXClientData((IntPtr)classHandle));
-
-                // parse complete
-                @class.Parsed = true;
             }
             return true;
         }
@@ -108,8 +107,6 @@ namespace clangen
         {
             // get class name
             CXType type = clang.getCursorType(cursor);
-            CXCursor typeDeclCursor = clang.getTypeDeclaration(type);
-            string name = clang.getTypeSpelling(type).ToString();
 
             // create the base class
             BaseClass baseClass = new BaseClass
@@ -117,9 +114,9 @@ namespace clangen
                 // check access specifier
                 Access = ClangTraits.ToAccessSpecifier(clang.getCXXAccessSpecifier(cursor)),
                 // native class type
-                Class = AST_.GetClass(name),
+                Type = TypeVisitor.GetNativeType(AST_, type),
                 // check is virtual base
-                IsVirtual = clang.CXXRecord_isAbstract(typeDeclCursor) != 0
+                IsVirtual = clang.isVirtualBase(cursor) != 0
             };
 
             // register base class
@@ -184,6 +181,9 @@ namespace clangen
             // deep visit children
             GCHandle delegateHandler = GCHandle.Alloc(func);
             clang.visitChildren(cursor, ParameterVisitor, new CXClientData((IntPtr)delegateHandler));
+
+            // process access specifier
+            memberFunc.Access = ClangTraits.ToAccessSpecifier(clang.getCXXAccessSpecifier(cursor));
 
             // register method
             thisClass.AddMethod(memberFunc);
@@ -258,7 +258,7 @@ namespace clangen
             int templateNum = clang.Type_getNumTemplateArguments(type);
             if(templateNum > 0)
             {
-                thisClass.SetTemplateParameterCount((uint)templateNum);
+                thisClass.SetTemplateParameterCount(templateNum);
                 for (int loop = 0; loop < templateNum; ++loop)
                 {
                     CXType argType = clang.Type_getTemplateArgumentAsType(type, (uint)loop);

@@ -24,15 +24,26 @@ namespace clangen
             NativeFunction function = AST_.GetFunction(functionName, functionTypeName);
             if(!function.Parsed)
             {
+                function.Parsed = true;
+
+                // spelling as unscoped name
+                function.UnscopedName = clang.getCursorSpelling(cursor).ToString();
+
+                // create proto
+                FunctionProto proto = new FunctionProto();
+
                 // proces result type
                 CXType resultType = clang.getCursorResultType(cursor);
-                function.ResultType = TypeVisitor.GetNativeType(AST_, resultType);
+                proto.ResultType = TypeVisitor.GetNativeType(AST_, resultType);
 
                 // create IntPtr for context
-                GCHandle funcHandle = GCHandle.Alloc(function);
+                GCHandle protoHandle = GCHandle.Alloc(proto);
 
                 // visit children
-                clang.visitChildren(cursor, Visitor, new CXClientData((IntPtr)funcHandle));
+                clang.visitChildren(cursor, Visitor, new CXClientData((IntPtr)protoHandle));
+
+                // set proto
+                function.Proto = proto;
             }
 
             return true;
@@ -44,7 +55,7 @@ namespace clangen
             {
                 // prepare client data
                 GCHandle funcHandle = (GCHandle)data;
-                NativeFunction thisFunc = funcHandle.Target as NativeFunction;
+                FunctionProto proto = funcHandle.Target as FunctionProto;
 
                 CXType type = clang.getCursorType(cursor);
 
@@ -67,7 +78,7 @@ namespace clangen
                     return CXChildVisitResult.CXChildVisit_Continue;
                 }, new CXClientData(IntPtr.Zero));
 
-                thisFunc.AddParameter(param);
+                proto.AddParameter(param);
             }
 
             return CXChildVisitResult.CXChildVisit_Recurse;

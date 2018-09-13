@@ -8,6 +8,7 @@ namespace clangen
     {
         Unknown,
         Void,
+        NullPtr,
         Bool,
         Char,
         Int8,
@@ -22,133 +23,158 @@ namespace clangen
         Float,
         Double,
         LongDouble,
+        Function,
         Enum,
-        Object
+        Object,
+        // extend types
+        Pointer,
+        LValueReference,
+        RValueReference,
+        MemberFunctionPointer,
+        MemberDataPointer,
+        Array,
+        Typedef
     }
 
-    public enum QulifierType
+    public class NativeArrayType
     {
-        Unknown,
-        LRef,
-        RRef,
-        Ptr
+        public int Count { get; set; }
+        public NativeType Type { get; set; }
     }
 
-    public class TypeInfo
+    public class MemberFunctionPointer
     {
-        public BasicType Type { get; private set; }
-        private object Info;
+        public NativeClass Class { get; set; }
+        public FunctionProto Function { get; set; }
+    }
 
-        public TypeInfo()
-        {
-            Type = BasicType.Unknown;
-        }
-
-        public void SetBasicType(BasicType type)
-        {
-            Debug.Assert(ASTTraits.IsBuiltInType(type));
-            Type = type;
-            Info = null;
-        }
-
-        public void SetClass(NativeClass @class)
-        {
-            Type = BasicType.Object;
-            Info = @class;
-        }
-
-        public void SetEnum(Enumeration @enum)
-        {
-            Type = BasicType.Enum;
-            Info = @enum;
-        }
+    public class MemberDataPointer
+    {
+        public NativeClass Class { get; set; }
+        public NativeType Data { get; set; }
     }
 
     public class NativeType
     {
-        // property
+        // basic property
         public string TypeName { get; }
+        public string UnscopedName { get; set; }
         public bool Parsed { get; set; } = false;
         public bool IsConst { get; set; } = false;
-        public QulifierType Qualifier { get; set; } = QulifierType.Unknown;
 
-        // builtin type, class or enum 
-        public TypeInfo Info { get; private set; }
+        // type info
+        public BasicType TypeKind { get; set; } = BasicType.Unknown;
+        public object Type { get; set; }
 
-        // array
-        public bool IsArray { get; set; } = false;
-        public int Count { get; set; } = -1;
+        // name
+        public string CollapsedName { get { return GetCollapsedName(); } }
 
-        // typedef or type alias
-        public NativeType ReferencedType { get; private set; } = null;
-        public string CollaspedName { get{ return GenerateColloaspedName(); } }
-
-        public NativeType(string typeName)
+        public NativeType(string name)
         {
-            TypeName = typeName;
+            TypeName = name;
         }
 
-        public void SetReferencedType(NativeType type)
+        void SetType(BasicType kind, object type)
         {
-            Debug.Assert(type != null);
-            ReferencedType = type;
+            TypeKind = kind;
+            Type = type;
         }
 
-        public void SetBasicType(BasicType type)
+        public void SetBuiltin(BasicType type)
         {
             Debug.Assert(ASTTraits.IsBuiltInType(type));
-            GetInfo().SetBasicType(type);
+            SetType(type, null);
         }
 
-        public void SetClass(NativeClass @class)
+        public void SetEnum(Enumeration e)
         {
-            GetInfo().SetClass(@class);
+            SetType(BasicType.Enum, e);
         }
 
-        public void SetEnum(Enumeration @enum)
+        public void SetClass(NativeClass c)
         {
-            GetInfo().SetEnum(@enum);
+            SetType(BasicType.Object, c);
         }
 
-        private TypeInfo GetInfo()
+        public void SetFunction(FunctionProto f)
         {
-            if (Info == null)
-                Info = new TypeInfo();
-            return Info;
+            SetType(BasicType.Function, f);
         }
 
-        public string GetCollaspedName()
+        public void SetTypeLValRef(NativeType type)
         {
-            return GenerateColloaspedName();
+            SetType(BasicType.LValueReference, type);
         }
 
-        private string GenerateColloaspedName()
+        public void SetTypeRValRef(NativeType type)
         {
-            if (ReferencedType != null)
+            SetType(BasicType.RValueReference, type);
+        }
+
+        public void SetPointer(NativeType type)
+        {
+            SetType(BasicType.Pointer, type);
+        }
+
+        public void SetTypedef(NativeType type)
+        {
+            SetType(BasicType.Typedef, type);
+        }
+
+        public void SetArray(NativeArrayType arr)
+        {
+            SetType(BasicType.Array, arr);
+        }
+
+        public void SetPMF(MemberFunctionPointer pmf)
+        {
+            SetType(BasicType.MemberFunctionPointer, pmf);
+        }
+
+        public void SetPMD(MemberDataPointer pmd)
+        {
+            SetType(BasicType.MemberDataPointer, pmd);
+        }
+
+        public string GetCollapsedName(bool collapseTypedef = true, bool withConst = true)
+        {
+            bool valid = true;
+            string result;
+            if (ASTTraits.IsBuiltInType(TypeKind))
+                result = ASTTraits.ToString(TypeKind);
+            else if (ASTTraits.IsObject(TypeKind))
+                result = (Type as NativeClass).Name;
+            else if (ASTTraits.IsEnum(TypeKind))
+                result = (Type as Enumeration).Name;
+            else if (ASTTraits.IsPointer(TypeKind))
+                result = string.Format("{0} *", (Type as NativeType).CollapsedName);
+            else if (ASTTraits.IsLValueReference(TypeKind))
+                result = string.Format("{0} &", (Type as NativeType).CollapsedName);
+            else if (ASTTraits.IsRValueReference(TypeKind))
+                result = string.Format("{0} &&", (Type as NativeType).CollapsedName);
+            else if (ASTTraits.IsTypedef(TypeKind))
             {
-                Debug.Assert(ReferencedType != null);
-                string collaspedName = ReferencedType.CollaspedName;
-
-                if (IsConst)
-                    collaspedName += " const";
-
-                switch (Qualifier)
+                Debug.Assert(!IsConst);
+                if (collapseTypedef)
+                    result = (Type as NativeType).CollapsedName;
+                else
                 {
-                    case QulifierType.LRef:
-                        collaspedName += "&";
-                        break;
-                    case QulifierType.RRef:
-                        collaspedName += "&&";
-                        break;
-                    case QulifierType.Ptr:
-                        collaspedName += "*";
-                        break;
+                    if (!withConst)
+                        result = StringTools.RemoveFirstOf(TypeName, "const");
+                    else 
+                        result = TypeName;
                 }
-
-                return collaspedName;
+            }
+            else
+            {
+                valid = false;
+                result = "unknown";
             }
 
-            return TypeName;
+            if (valid && IsConst && withConst)
+                result += " const";
+
+            return result;
         }
     }
 

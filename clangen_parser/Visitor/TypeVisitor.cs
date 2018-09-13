@@ -13,14 +13,22 @@ namespace clangen
             {
                 type = clang.getCursorType(clang.getTypeDeclaration(type));
             }
+            Debug.Assert(!ClangTraits.IsInvalid(type));
 
             string typeName = clang.getTypeSpelling(type).ToString();
+            Debug.Assert(typeName.Length > 0);
             NativeType nativeType = ast.GetType(typeName);
 
             if(!nativeType.Parsed)
             {
+                nativeType.Parsed = true;
+
+                // get cursor spelling as unscoped name
+                CXCursor declaration = clang.getTypeDeclaration(type);
+                nativeType.UnscopedName = clang.getCursorSpelling(declaration).ToString();
+
                 // not a type reference nor a type with qualifiers
-                if (ClangTraits.IsTypeEntity(type))
+                if (ClangTraits.IsTypeEntity(type) || typeName == "std::nullptr_t")
                     ProcessTypeEntity(ast, nativeType, type, ClangTraits.IsUnexposedType(cxType));
                 // using or typedef
                 else if (ClangTraits.IsTypedef(type))
@@ -28,9 +36,12 @@ namespace clangen
                 else if (ClangTraits.IsArray(type))
                     ProcessArray(ast, nativeType, type);
                 // reference and pointer 
+                else if (ClangTraits.IsReference(type) || ClangTraits.IsPointer(type))
+                    ProcessReferencePointer(ast, nativeType, type);
+                else if (ClangTraits.IsMemberPointer(type))
+                    ProcessMemberPointer(ast, nativeType, cxType);
                 else
-                    ProcessQualifiers(ast, nativeType, type);
-                nativeType.Parsed = true;
+                    Debug.Assert(false);
             }
 
             return nativeType;
@@ -41,7 +52,7 @@ namespace clangen
             type.IsConst = ClangTraits.IsConst(cxType);
             if (ClangTraits.IsBuiltInType(cxType))
             {
-                type.SetBasicType(ClangTraits.ToBasicType(cxType));
+                type.SetBuiltin(ClangTraits.ToBasicType(cxType));
             }
             else
             {
@@ -53,6 +64,10 @@ namespace clangen
                 {
                     type.SetEnum(ast.GetEnum(removeQualifierName));
                 }
+                else if(ClangTraits.IsFunction(cxType))
+                {
+                    type.SetFunction(GetFunctionProto(ast, cxType));
+                }
                 else if(ClangTraits.IsUserDefiendType(cxType))
                 {
                     NativeClass nativeClass = ast.GetClass(removeQualifierName);
@@ -61,14 +76,9 @@ namespace clangen
                     // or the native class is a instantiation of a template or partial specialization
                     if(isInstanciation && !nativeClass.Parsed)
                     {
-                        CXCursor templateCurosr = clang.getSpecializedCursorTemplate(cursor);
-                        string templateID = clang.getCursorUSR(templateCurosr).ToString();
-                        ClassTemplate template = ast.GetClassTemplate(templateID);
-                        Debug.Assert(template.Parsed);
-                        
-                        // TODO ... template instantiation
-
-                        nativeClass.Parsed = true;
+                        bool result = TemplateHelper.VisitTemplateArguments(cursor, nativeClass, ast);
+                        Debug.Assert(result);
+                        nativeClass.Parsed = result;
                     }
 
                     type.SetClass(nativeClass);
@@ -82,47 +92,79 @@ namespace clangen
             CXCursor typedefedCursor = clang.getTypeDeclaration(cxType);
             CXType typedefedType = clang.getTypedefDeclUnderlyingType(typedefedCursor);
             NativeType typedefedNativeType = GetNativeType(ast, typedefedType);
-            type.SetReferencedType(typedefedNativeType);
+            type.SetTypedef(typedefedNativeType);
         }
 
         private static void ProcessArray(AST ast, NativeType type, CXType cxType)
         {
             // set as array
-            type.IsArray = true;
-            if (!ClangTraits.IsIncompleteArray(cxType))
-            {
-                type.Count = (int)clang.getArraySize(cxType);
-            }
-
-            // get element type
             CXType elementType = clang.getArrayElementType(cxType);
-            NativeType nativeType = GetNativeType(ast, elementType);
-            type.SetReferencedType(nativeType);
+            NativeArrayType arr = new NativeArrayType
+            {
+                Count = (int)clang.getArraySize(cxType),
+                Type = GetNativeType(ast, elementType)
+            };
+            type.SetArray(arr);
         }
 
-        private static void ProcessQualifiers(AST ast, NativeType type, CXType cxType)
+        private static void ProcessReferencePointer(AST ast, NativeType type, CXType cxType)
         {
-            Debug.Assert(type.Qualifier == QulifierType.Unknown);
+            Debug.Assert(type.TypeKind == BasicType.Unknown);
             type.IsConst = ClangTraits.IsConst(cxType);
-            if (ClangTraits.IsLValueReference(cxType))
-            {
-                type.Qualifier = QulifierType.LRef;
-            }
-            else if (ClangTraits.IsRValueReference(cxType))
-            {
-                type.Qualifier = QulifierType.RRef;
-            }
-            else if (ClangTraits.IsPointer(cxType))
-            {
-                type.Qualifier = QulifierType.Ptr;
-            }
-            Debug.Assert(type.Qualifier != QulifierType.Unknown);
 
             CXType pointeeType = clang.getPointeeType(cxType);
-            // pointer and reference type requires only forward declaration and 
-            // does not trigger template instantiation
             NativeType nativeType = GetNativeType(ast, pointeeType);
-            type.SetReferencedType(nativeType);
+
+            if (ClangTraits.IsLValueReference(cxType))
+                type.SetTypeLValRef(nativeType);
+            else if (ClangTraits.IsRValueReference(cxType))
+                type.SetTypeRValRef(nativeType);
+            else if (ClangTraits.IsPointer(cxType))
+                type.SetPointer(nativeType);
+
+            Debug.Assert(type.TypeKind != BasicType.Unknown);
+        }
+
+        private static void ProcessMemberPointer(AST ast, NativeType type, CXType cxType)
+        {
+            CXType classType = clang.Type_getClassType(cxType);
+            string className = clang.getTypeSpelling(classType).ToString();
+            NativeClass nativeClass = ast.GetClass(className);
+
+            CXType pointeeType = clang.getPointeeType(cxType);
+            if (ClangTraits.IsFunction(pointeeType))
+            {
+                type.SetPMF(new MemberFunctionPointer
+                {
+                    Class = nativeClass,
+                    Function = GetFunctionProto(ast, pointeeType)
+                });
+            }
+            else
+            {
+                type.SetPMD(new MemberDataPointer
+                {
+                    Class = nativeClass,
+                    Data = GetNativeType(ast, pointeeType)
+                });
+            }
+        }
+
+        private static FunctionProto GetFunctionProto(AST ast, CXType funcType)
+        {
+            Debug.Assert(ClangTraits.IsFunction(funcType));
+            FunctionProto proto = new FunctionProto();
+            proto.ResultType = GetNativeType(ast, clang.getResultType(funcType));
+            uint arity = (uint)clang.getNumArgTypes(funcType);
+            for(uint loop = 0; loop < arity; ++loop)
+            {
+                CXType argType = clang.getArgType(funcType, loop);
+                FunctionParameter param = new FunctionParameter();
+                param.Type = GetNativeType(ast, argType);
+                proto.AddParameter(param);
+            }
+
+            return proto;
         }
     }
 

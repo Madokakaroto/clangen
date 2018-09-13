@@ -73,8 +73,10 @@ namespace clangen
                     TypeVisitor.GetNativeType(ast, clang.getCursorType(cursor));
                     break;
                 case CXCursorKind.CXCursor_ClassTemplate:
+                    visitor = new ClassTemplateVisitor(ast, this, false);
+                    break;
                 case CXCursorKind.CXCursor_ClassTemplatePartialSpecialization:
-                    visitor = new ClassTemplateVisitor(ast, this);
+                    visitor = new ClassTemplateVisitor(ast, this, true);
                     break;
                 case CXCursorKind.CXCursor_FunctionTemplate:
                     break;

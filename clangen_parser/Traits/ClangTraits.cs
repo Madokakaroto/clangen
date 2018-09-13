@@ -100,6 +100,11 @@ namespace clangen
             return type.kind == CXTypeKind.CXType_Elaborated;
         }
 
+        public static bool IsFunction(CXType type)
+        {
+            return type.kind == CXTypeKind.CXType_FunctionProto;
+        }
+
         public static bool IsArray(CXType type)
         {
             return type.kind == CXTypeKind.CXType_ConstantArray || 
@@ -118,12 +123,18 @@ namespace clangen
                    IsEnum(type) || 
                    IsUserDefiendType(type) ||
                    IsUnexposedType(type) ||
-                   IsElaboratedType(type);
+                   IsElaboratedType(type) ||
+                   IsFunction(type);
         }
 
         public static bool IsTypedef(CXType type)
         {
             return type.kind == CXTypeKind.CXType_Typedef;
+        }
+
+        public static bool IsMemberPointer(CXType type)
+        {
+            return type.kind == CXTypeKind.CXType_MemberPointer;
         }
 
         public static BasicType ToBasicType(CXType type)
@@ -170,6 +181,20 @@ namespace clangen
                     return BasicType.Object;
                 case CXTypeKind.CXType_Enum:
                     return BasicType.Enum;
+                case CXTypeKind.CXType_NullPtr:
+                    return BasicType.NullPtr;
+                case CXTypeKind.CXType_ConstantArray:
+                case CXTypeKind.CXType_DependentSizedArray:
+                case CXTypeKind.CXType_IncompleteArray:
+                    return BasicType.Array;
+                case CXTypeKind.CXType_LValueReference:
+                    return BasicType.LValueReference;
+                case CXTypeKind.CXType_RValueReference:
+                    return BasicType.RValueReference;
+                case CXTypeKind.CXType_Pointer:
+                    return BasicType.Pointer;
+                case CXTypeKind.CXType_Typedef:
+                    return BasicType.Typedef;
                 default:
                     return BasicType.Unknown;
             }
