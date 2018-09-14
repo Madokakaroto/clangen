@@ -86,6 +86,7 @@ namespace clangen
                         if(TemplateHelper.VisitTemplate(cursor, nativeClass, ast))
                         {
                             TemplateHelper.VisitTemplateParameter(cursor, theType, nativeClass, ast, context);
+
                         }
                     }
 

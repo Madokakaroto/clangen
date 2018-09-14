@@ -301,14 +301,43 @@ namespace clangen
                 return type;
         }
 
+        public static NativeType GetMemberType(NativeClass @class, string unscopedName)
+        {
+            foreach (MemberType mType in @class.MemberTypes)
+            {
+                if (mType.Access == AccessSpecifier.Public && mType.Type.UnscopedName == unscopedName)
+                    return mType.Type;
+            }
+            return null;
+        }
+
+        public static NativeType GetMemberType(NativeType type, string unscopedName)
+        {
+            if(IsObject(type.TypeKind))
+                return GetMemberType(type.Type as NativeClass, unscopedName);
+            else if(IsTypedef(type.TypeKind))
+                return GetMemberType(type.Type as NativeType, unscopedName);
+            return null;
+        }
+
         public static NativeType KeyType(NativeType type)
         {
-            return null;
+            return GetMemberType(type, "key_type");
+        }
+
+        public static NativeType KeyType(NativeClass @class)
+        {
+            return GetMemberType(@class, "key_type");
         }
 
         public static NativeType MappedType(NativeType type)
         {
-            return null;
+            return GetMemberType(type, "mapped_type");
+        }
+
+        public static NativeType MappedType(NativeClass @class)
+        {
+            return GetMemberType(@class, "mapped_type");
         }
 
         public static bool IsSameType(NativeType lhs, NativeType rhs)

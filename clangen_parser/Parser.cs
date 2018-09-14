@@ -79,6 +79,7 @@ namespace clangen
 
             ASTVisitor visitor = new ASTVisitor();
             AST ast = visitor.Visit(TU);
+
             clang.disposeIndex(Index);
             return ast;
         }
