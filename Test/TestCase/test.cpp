@@ -35,10 +35,20 @@ struct foo<Q, int, a> {}; */
 //	using type = TVector<int>;
 //};
 
-template <typename T, unsigned A = 1, int B = 0>
+template <typename T, typename Q>
 struct foo {};
 
 template <typename T>
-using foo_a = foo<T, 2>;
+struct foo<double, T> {};
 
-using foo_t = foo_a<int>;
+template <>
+struct foo<int, double>
+{
+	foo<double, int> f;
+};
+
+
+//template <typename T>
+//using foo_a = foo<T, 2>;
+//
+//using foo_t = foo_a<int>;

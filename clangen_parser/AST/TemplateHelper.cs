@@ -16,7 +16,18 @@ namespace clangen
 
             string templateID = clang.getCursorUSR(templateCursor).ToString();
             ClassTemplate template = ast.GetClassTemplate(templateID);
-            c.SetTemplate(template);
+
+            CXCursor originalTemplateCursor = clang.getSpecializedCursorTemplate(templateCursor);
+            ClassTemplate originalTemplate;
+            if (ClangTraits.IsInvalid(originalTemplateCursor))
+                originalTemplate = template;
+            else
+            {
+                string originalTemplateID = clang.getCursorUSR(originalTemplateCursor).ToString();
+                originalTemplate = ast.GetClassTemplate(originalTemplateID);
+            }
+
+            c.SetTemplate(template, originalTemplate);
             return true;
         }
 
@@ -27,15 +38,13 @@ namespace clangen
             AST ast,
             TypeVisitContext context)
         {
-            ClassTemplate template = @class.InstanceOf;
+            ClassTemplate template = @class.OriginalTemplate;
             Debug.Assert(template != null);
             Debug.Assert(template.TP != null);
 
             int templateArgNum = clang.Type_getNumTemplateArguments(type);
             if (templateArgNum < 0)
                 return false;
-
-            Debug.Assert(context != null);
 
             @class.SetTemplateParameterCount(templateArgNum);
             int contextIndex = 0;
@@ -55,7 +64,7 @@ namespace clangen
                     param.Kind == TemplateParameterKind.Dependent)
                 {
                     string literal;
-                    if (!context.Empty)
+                    if (context != null && !context.Empty)
                     {
                         literal = context.Consume();
                     }

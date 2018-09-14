@@ -354,6 +354,8 @@ namespace clangen
                     return "int32_t";
                 case BasicType.Int64:
                     return "int64_t";
+                case BasicType.UChar:
+                    return "unsigned char";
                 case BasicType.UInt8:
                     return "uint8_t";
                 case BasicType.UInt16:

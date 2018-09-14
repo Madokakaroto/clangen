@@ -30,6 +30,9 @@ namespace clangen
             // get class object
             NativeClass @class = AST_.GetClass(className);
 
+            // if a class is from template instatiation or a type declaration
+            @class.IsClassEntity = true;
+
             // is definition
             bool isDefinition = clang.isCursorDefinition(cursor) != 0;
 

@@ -80,7 +80,7 @@ namespace clangen
 
                     // if native class is parsed already, the native class is a full specialization
                     // or the native class is a instantiation of a template or partial specialization
-                    if(!nativeClass.Parsed)
+                    if(!nativeClass.IsClassEntity && !nativeClass.Parsed)
                     {
                         nativeClass.Parsed = true;
                         if(TemplateHelper.VisitTemplate(cursor, nativeClass, ast))

@@ -8,6 +8,7 @@ namespace clangen
         // auto property
         public string Name { get; }
         public bool Parsed { get; set; } = false;
+        public bool IsClassEntity { get; set; } = false;
         public string UnscopedName { get; set; }
         public StructOrClass ClassTag { get; set; } = StructOrClass.InDoubt;
         public bool IsFinal { get; set; } = false;
@@ -18,6 +19,7 @@ namespace clangen
         public bool IsTemplateInstantiation { get; private set; } = false;
         public bool IsFullSpecialization { get; set; } = false;
         public ClassTemplate InstanceOf { get; private set; } = null;
+        public ClassTemplate OriginalTemplate { get; private set; } = null;
         public int TemplateParameterCount { get; private set; }
         public List<InstancedTemplateParam> TemplateParameters { get; } 
             = new List<InstancedTemplateParam>();
@@ -120,10 +122,11 @@ namespace clangen
             Constructors.Add(ctor);
         }
 
-        public void SetTemplate(ClassTemplate template)
+        public void SetTemplate(ClassTemplate template, ClassTemplate original)
         {
             IsTemplateInstantiation = true;
             InstanceOf = template;
+            OriginalTemplate = original;
         }
 
         public void SetTemplateParameterCount(int count)
