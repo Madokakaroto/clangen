@@ -33,7 +33,7 @@ namespace clangen
 
         public static bool IsReference(CXType type)
         {
-            return IsRValueReference(type) || IsRValueReference(type);
+            return IsRValueReference(type) || IsLValueReference(type);
         }
 
         public static bool IsConst(CXType type)
@@ -271,6 +271,9 @@ namespace clangen
             {
                 case CXCursorKind.CXCursor_IntegerLiteral:
                 case CXCursorKind.CXCursor_CXXBoolLiteralExpr:
+                case CXCursorKind.CXCursor_DeclRefExpr:
+                case CXCursorKind.CXCursor_CharacterLiteral:
+                case CXCursorKind.CXCursor_UnexposedExpr:
                     return true;
                 default:
                     return false;
@@ -286,6 +289,21 @@ namespace clangen
         public static bool IsTemplateRef(CXCursor cursor)
         {
             return CXCursorKind.CXCursor_TemplateRef == cursor.kind;
+        }
+
+        public static bool IsTemplateAlias(CXCursor cursor)
+        {
+            return CXCursorKind.CXCursor_TypeAliasTemplateDecl == cursor.kind;
+        }
+
+        public static bool IsTypeRef(CXCursor cursor)
+        {
+            return CXCursorKind.CXCursor_TypeRef == cursor.kind;
+        }
+
+        public static bool IsUnexposedExpr(CXCursor cursor)
+        {
+            return CXCursorKind.CXCursor_UnexposedExpr == cursor.kind;
         }
     }
 }

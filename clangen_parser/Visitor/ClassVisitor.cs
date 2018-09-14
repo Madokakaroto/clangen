@@ -108,13 +108,16 @@ namespace clangen
             // get class name
             CXType type = clang.getCursorType(cursor);
 
+            // type visit context
+            TypeVisitContext context = new TypeVisitContext(cursor);
+
             // create the base class
             BaseClass baseClass = new BaseClass
             {
                 // check access specifier
                 Access = ClangTraits.ToAccessSpecifier(clang.getCXXAccessSpecifier(cursor)),
                 // native class type
-                Type = TypeVisitorHelper.GetNativeType(AST_, type),
+                Type = TypeVisitorHelper.GetNativeType(AST_, type, context),
                 // check is virtual base
                 IsVirtual = clang.isVirtualBase(cursor) != 0
             };
@@ -137,19 +140,19 @@ namespace clangen
             };
 
             List<string> tokens = ASTVisitor.GetCursorTokens(cursor);
-            if (tokens[0] == "explicit")
+            if(tokens.Count > 0)
             {
-                ctor.IsExplicit = true;
-            }
-
-            int count = tokens.Count;
-            if (tokens[count - 2] == "=")
-            {
-                string lastToken = tokens[count - 1];
-                if (lastToken == "default")
-                    ctor.Composite = DefaultCompositeKind.Default;
-                else if (lastToken == "delete")
-                    ctor.Composite = DefaultCompositeKind.Delete;
+                if (tokens[0] == "explicit")
+                    ctor.IsExplicit = true;
+                int count = tokens.Count;
+                if (tokens[count - 2] == "=")
+                {
+                    string lastToken = tokens[count - 1];
+                    if (lastToken == "default")
+                        ctor.Composite = DefaultCompositeKind.Default;
+                    else if (lastToken == "delete")
+                        ctor.Composite = DefaultCompositeKind.Delete;
+                }
             }
 
             // deep visit
@@ -257,6 +260,8 @@ namespace clangen
             // set template instance info
             if(TemplateHelper.VisitTemplate(cursor, thisClass, AST_))
             {
+                thisClass.IsFullSpecialization = true;
+
                 TypeVisitContext context = new TypeVisitContext(cursor);
                 TemplateHelper.VisitTemplateParameter(cursor, type, thisClass, AST_, context);
             }
@@ -304,9 +309,12 @@ namespace clangen
 
         private void ProcessTypeExport(NativeClass thisClass, CXCursor cursor, CXCursor parent)
         {
+            // createfield context
+            TypeVisitContext context = new TypeVisitContext(cursor);
+
             // get field type
             CXType type = clang.getCursorType(cursor);
-            NativeType nativeType = TypeVisitorHelper.GetNativeType(AST_, type);
+            NativeType nativeType = TypeVisitorHelper.GetNativeType(AST_, type, context);
 
             // get field access specifier
             AccessSpecifier access = ClangTraits.ToAccessSpecifier(clang.getCXXAccessSpecifier(cursor));

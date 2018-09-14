@@ -8,7 +8,7 @@ namespace clangen
         public static bool IsIntegral(BasicType type)
         {
             return type >= BasicType.Bool &&
-                type <= BasicType.UChar;
+                type <= BasicType.UInt64;
         }
 
         public static bool IsFloatingPoint(BasicType type)

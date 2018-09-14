@@ -18,19 +18,27 @@ struct foo<int, T, a> {};
 template <typename Q, Q a>
 struct foo<Q, int, a> {}; */
 
-template <typename T>
+//namespace std
+//{
+//	template <typename T>
+//	struct alloc {};
+//	
+//	template <typename T, typename Q>
+//	struct vector {};
+//}
+//
+//template <typename T>
+//using TVector = std::vector<T, std::alloc<T>>;
+//
+//struct bar
+//{
+//	using type = TVector<int>;
+//};
+
+template <typename T, unsigned A = 1, int B = 0>
 struct foo {};
 
-template <typename T, template <typename Q> class TP>
-struct bar {};
+template <typename T>
+using foo_a = foo<T, 2>;
 
-//template <>
-//struct bar<int, foo>
-//{};
-
-//using my_bar = bar<foo<foo<double>>, foo>;
-template<>
-struct bar<foo<foo<double>>, foo>
-{
-	
-};
+using foo_t = foo_a<int>;

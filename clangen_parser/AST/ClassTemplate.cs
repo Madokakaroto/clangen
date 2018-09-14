@@ -67,12 +67,18 @@ namespace clangen
         }
     }
 
+    public class TemplateNonTypeParam
+    {
+        public object NoneType { get; set; }
+        public string DefaultLiteral { get; set; }
+    }
+
     public class TemplateParameter
     {
         public string Name { get; }
         public TemplateParameterKind Kind { get; }
         public bool IsVariadic { get; }
-        private object paramExtra_;
+        public object Extra { get; private set; }
 
         public TemplateParameter(string name, TemplateParameterKind kind, bool isVariadic)
         {
@@ -81,24 +87,32 @@ namespace clangen
             IsVariadic = isVariadic;
         }
 
-        public void SetExtra(NativeType extra)
+        public void SetExtra(NativeType extra, string literal)
         {
             Debug.Assert(TemplateParameterKind.NoneType == Kind);
-            Debug.Assert(ASTTraits.IsIntegral(extra));
-            paramExtra_ = extra;
+            Debug.Assert(ASTTraits.IsIntegral(extra) || ASTTraits.IsEnum(extra));
+            Extra = new TemplateNonTypeParam
+            {
+                NoneType = extra,
+                DefaultLiteral = literal
+            };
         }
 
-        public void SetExtra(TemplateParameter extra)
+        public void SetExtra(TemplateParameter extra, string literal)
         {
             Debug.Assert(TemplateParameterKind.Dependent == Kind);
             Debug.Assert(TemplateParameterKind.Type == extra.Kind);
-            paramExtra_ = extra;
+            Extra = new TemplateNonTypeParam
+            {
+                NoneType = extra,
+                DefaultLiteral = literal
+            };
         }
 
         public void SetExtra(TemplateProto proto)
         {
             Debug.Assert(Kind == TemplateParameterKind.Template);
-            paramExtra_ = proto;
+            Extra = proto;
         }
 
         public string GetSignature(bool withParamName)
@@ -109,11 +123,11 @@ namespace clangen
             if (TemplateParameterKind.Type == Kind)
                 result = "typename";
             else if (TemplateParameterKind.NoneType == Kind)
-                result = string.Format("{0} ", (paramExtra_ as NativeType).CollapsedName);
+                result = string.Format("{0} ", (Extra as NativeType).CollapsedName);
             else if (TemplateParameterKind.Dependent == Kind)
-                result = (paramExtra_ as TemplateParameter).Name;
+                result = (Extra as TemplateParameter).Name;
             else
-                result = (paramExtra_ as TemplateProto).GetSignature(withParamName, true);
+                result = (Extra as TemplateProto).GetSignature(withParamName, true);
 
             // add template parameter spelling
             if (withParamName && Name.Length > 0)

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using ClangSharp;
@@ -108,12 +109,22 @@ namespace clangen
             // check if dependent or nontype
             bool isDependent = false;
             string dependName = null;
+            string default_value = null;
             clang.visitChildren(cursor, (CXCursor c, CXCursor p, IntPtr data) =>
             {
-                if(CXCursorKind.CXCursor_TypeRef == c.kind)
+                if(ClangTraits.IsTypeRef(c))
                 {
-                    isDependent = true;
-                    dependName = clang.getCursorSpelling(c).ToString();
+                    CXType t = clang.getCursorType(c);
+                    if(ClangTraits.IsUnexposedType(t))
+                    {
+                        isDependent = true;
+                        dependName = clang.getCursorSpelling(c).ToString();
+                    }
+                }
+                else if(ClangTraits.IsNonTypeTemplateParamLiteral(c))
+                {
+                    List<string> tokens = ASTVisitor.GetCursorTokens(c);
+                    default_value = string.Concat(tokens);
                 }
                 return CXChildVisitResult.CXChildVisit_Continue;
             }, new CXClientData(IntPtr.Zero));
@@ -125,14 +136,14 @@ namespace clangen
                 param = new TemplateParameter(paramName, TemplateParameterKind.Dependent, isVariadic);
                 TemplateParameter dependeParam = tp.GetTemplateParameter(dependName);
                 Debug.Assert(dependeParam != null);
-                param.SetExtra(dependeParam);
+                param.SetExtra(dependeParam, default_value);
             }
             else
             {
                 CXType type = clang.getCursorType(cursor);
                 NativeType nativeType = TypeVisitorHelper.GetNativeType(AST_, type);
                 param = new TemplateParameter(paramName, TemplateParameterKind.NoneType, isVariadic);
-                param.SetExtra(nativeType);
+                param.SetExtra(nativeType, default_value);
             }
             return param;
         }

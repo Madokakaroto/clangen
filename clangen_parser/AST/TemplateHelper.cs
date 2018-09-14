@@ -14,11 +14,6 @@ namespace clangen
             if (ClangTraits.IsInvalid(templateCursor))
                 return false;
 
-            if(clang.isCursorDefinition(cursor) != 0)
-            {
-                // definition is a full specialization
-                c.IsFullSpecialization = true;
-            }
             string templateID = clang.getCursorUSR(templateCursor).ToString();
             ClassTemplate template = ast.GetClassTemplate(templateID);
             c.SetTemplate(template);
@@ -35,28 +30,12 @@ namespace clangen
             ClassTemplate template = @class.InstanceOf;
             Debug.Assert(template != null);
             Debug.Assert(template.TP != null);
-            Debug.Assert(context != null);
-
-            //List<string> context = new List<string>();
-            //clang.visitChildren(cursor, (CXCursor c, CXCursor p, IntPtr data) =>
-            //{
-            //    if(ClangTraits.IsNonTypeTemplateParamLiteral(c))
-            //    {
-            //        List<string> tokens = ASTVisitor.GetCursorTokens(c);
-            //        context.Add(string.Concat(tokens));
-            //    }
-            //    else if(ClangTraits.IsTemplateRef(c))
-            //    {
-            //        CXCursor refCursor = clang.getCursorReferenced(c);
-            //        string templateID = clang.getCursorUSR(refCursor).ToString();
-            //        context.Add(templateID);
-            //    }
-            //    return CXChildVisitResult.CXChildVisit_Continue;
-            //}, new CXClientData(IntPtr.Zero));
 
             int templateArgNum = clang.Type_getNumTemplateArguments(type);
             if (templateArgNum < 0)
                 return false;
+
+            Debug.Assert(context != null);
 
             @class.SetTemplateParameterCount(templateArgNum);
             int contextIndex = 0;
@@ -75,15 +54,26 @@ namespace clangen
                 else if(param.Kind == TemplateParameterKind.NoneType ||
                     param.Kind == TemplateParameterKind.Dependent)
                 {
-                    string literal = context.Consume();
+                    string literal;
+                    if (!context.Empty)
+                    {
+                        literal = context.Consume();
+                    }
+                    else
+                    {
+                        literal = (param.Extra as TemplateNonTypeParam).DefaultLiteral;
+                    }
+
+                    Debug.Assert(literal != null);
+
                     @class.SetTemplateParameter(loop, literal);
                     ++contextIndex;
                 }
                 else
                 {
                     Debug.Assert(TemplateParameterKind.Template == param.Kind);
-                    string templateID = context.Consume();
-                    ClassTemplate templateParam = ast.GetClassTemplate(templateID);
+                    // not support now
+                    ClassTemplate templateParam = null;
                     @class.SetTemplateParameter(loop, templateParam);
                 }
             }

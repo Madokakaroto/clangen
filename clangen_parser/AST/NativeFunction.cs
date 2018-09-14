@@ -19,7 +19,6 @@ namespace clangen
         }
     }
 
-
     public class NativeFunction
     {
         public string Name { get; }

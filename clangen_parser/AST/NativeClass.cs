@@ -143,7 +143,7 @@ namespace clangen
             TemplateParameters.Add(new InstancedTemplateParam(literal));
         }
 
-        public void SetTemplateParameter(uint index, ClassTemplate template)
+        public void SetTemplateParameter(uint index, ClassTemplate template = null)
         {
             Debug.Assert(index < TemplateParameterCount);
             TemplateParameters.Add(new InstancedTemplateParam(template));
